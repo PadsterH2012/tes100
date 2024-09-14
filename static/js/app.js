@@ -194,6 +194,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     option.textContent = type;
                     agentTypeSelect.appendChild(option);
                 });
+                
+                // Add event listener to load predefined system prompt
+                agentTypeSelect.addEventListener('change', loadPredefinedSystemPrompt);
+            });
+    }
+
+    function loadPredefinedSystemPrompt() {
+        const agentType = document.getElementById('agent-type').value;
+        fetch(`/api/agent_types/${agentType}/system_prompt`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('system-prompt').value = data.system_prompt;
             });
     }
 
