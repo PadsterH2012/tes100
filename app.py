@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
 from models import db, Project, ProjectDocument, Conversation, AIProvider, AIAgentConfig
+import os
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -71,5 +72,8 @@ def get_documents(project_id):
         "content": doc.content
     } for doc in documents])
 
-# Initialize the database
-init_db()
+if __name__ == '__main__':
+    init_db()
+    app.run(debug=False, host='127.0.0.1', port=int(os.environ.get('PORT', 8000)))
+else:
+    init_db()
