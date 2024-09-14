@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearChatMessages();
         loadProjectDocuments(projectId);
         loadChatHistory(projectId);
-    
+
         // Fetch and set the project name
         fetch(`/api/projects/${projectId}`)
             .then(response => response.json())
@@ -154,6 +154,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('project-documents-title').textContent = `Project - ${project.name}`;
             });
     }
+
+    // Add this function to load projects and select the last active project
+    function loadProjectsAndSelectLast() {
+        fetch('/api/projects')
+            .then(response => response.json())
+            .then(projects => {
+                projectList.innerHTML = '';
+                projects.forEach(project => {
+                    const li = document.createElement('li');
+                    li.textContent = project.name;
+                    li.addEventListener('click', () => selectProject(project.id));
+                    projectList.appendChild(li);
+                });
+
+                // Select the last project if available
+                if (projects.length > 0) {
+                    const lastProject = projects[projects.length - 1];
+                    selectProject(lastProject.id);
+                }
+            });
+    }
+
+    // Call this function when the page loads
+    document.addEventListener('DOMContentLoaded', loadProjectsAndSelectLast);
 
     loadProjects();
     loadProviders();
@@ -204,6 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 history.forEach(message => {
                     displayMessage(message);
                 });
+                chatMessages.scrollTop = chatMessages.scrollHeight;
             })
             .catch(error => {
                 console.error('Error loading chat history:', error);
