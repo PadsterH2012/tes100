@@ -53,6 +53,29 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
+    // Tab functionality
+    const tabLinks = document.querySelectorAll('#project-tabs ul li a');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // Remove active class from all tabs and contents
+            tabLinks.forEach(l => l.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+            
+            // Add active class to clicked tab and corresponding content
+            link.classList.add('active');
+            const tabId = link.getAttribute('href').substring(1);
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
+
+    // Set the first tab as active by default
+    tabLinks[0].classList.add('active');
+    tabContents[0].classList.add('active');
+
     newProjectButton.addEventListener('click', () => {
         const projectName = prompt('Enter project name:');
         if (projectName) {

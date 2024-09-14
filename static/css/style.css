@@ -84,6 +84,53 @@ section {
     padding-left: 2rem;
 }
 
+#project-tabs {
+    margin-top: 20px;
+}
+
+#project-tabs ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    background-color: #f1f1f1;
+    border-bottom: 1px solid #ccc;
+}
+
+#project-tabs ul li {
+    margin-bottom: -1px;
+}
+
+#project-tabs ul li a {
+    display: block;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: #333;
+    border: 1px solid transparent;
+    border-bottom: none;
+}
+
+#project-tabs ul li a:hover {
+    background-color: #ddd;
+}
+
+#project-tabs ul li a.active {
+    background-color: #fff;
+    border-color: #ccc;
+    border-bottom-color: #fff;
+}
+
+.tab-content {
+    display: none;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-top: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
 button {
     background-color: #3498db;
     color: #fff;
