@@ -177,10 +177,86 @@ document.addEventListener('DOMContentLoaded', () => {
                 configs.forEach(config => {
                     const li = document.createElement('li');
                     li.textContent = `${config.agent_type} - ${config.model_name}`;
+                    
+                    const editButton = document.createElement('button');
+                    editButton.textContent = 'Edit';
+                    editButton.addEventListener('click', () => editAgentConfig(config.id));
+                    
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Delete';
+                    deleteButton.addEventListener('click', () => deleteAgentConfig(config.id));
+                    
+                    li.appendChild(editButton);
+                    li.appendChild(deleteButton);
                     agentConfigList.appendChild(li);
                 });
             });
     }
+
+    function editAgentConfig(configId) {
+        fetch(`/api/ai_agent_configs/${configId}`)
+            .then(response => response.json())
+            .then(config => {
+                document.getElementById('config-id').value = config.id;
+                document.getElementById('agent-type').value = config.agent_type;
+                document.getElementById('provider-select').value = config.provider_id;
+                document.getElementById('model-name').value = config.model_name;
+                document.getElementById('system-prompt').value = config.system_prompt;
+            });
+    }
+
+    function deleteAgentConfig(configId) {
+        if (confirm('Are you sure you want to delete this agent configuration?')) {
+            fetch(`/api/ai_agent_configs/${configId}`, { method: 'DELETE' })
+                .then(() => loadAgentConfigs());
+        }
+    }
+
+    document.getElementById('clear-form').addEventListener('click', () => {
+        document.getElementById('ai-agent-form').reset();
+        document.getElementById('config-id').value = '';
+    });
+
+    document.getElementById('ai-agent-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const configId = document.getElementById('config-id').value;
+        const data = {
+            agent_type: document.getElementById('agent-type').value,
+            provider_id: document.getElementById('provider-select').value,
+            model_name: document.getElementById('model-name').value,
+            system_prompt: document.getElementById('system-prompt').value
+        };
+        
+        const url = configId ? `/api/ai_agent_configs/${configId}` : '/api/ai_agent_configs';
+        const method = configId ? 'PUT' : 'POST';
+        
+        fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(() => {
+            loadAgentConfigs();
+            document.getElementById('ai-agent-form').reset();
+            document.getElementById('config-id').value = '';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to save agent configuration. Please try again.');
+        });
+    });
+
+    // Call loadAgentTypes and loadAgentConfigs when the page loads
+    loadAgentTypes();
+    loadAgentConfigs();
 
     function loadAgentTypes() {
         fetch('/api/agent_types')
