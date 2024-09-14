@@ -28,7 +28,7 @@ section {
 }
 
 #project-list {
-    flex: 1;
+    flex: 0.5;
     border-right: 1px solid #ccc;
 }
 
