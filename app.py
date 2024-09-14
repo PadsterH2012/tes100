@@ -166,7 +166,11 @@ def ai_providers():
 def ai_provider(provider_id):
     provider = AIProvider.query.get_or_404(provider_id)
     if request.method == 'GET':
-        return jsonify({"id": provider.id, "name": provider.name, "api_url": provider.api_url})
+        api_key = ''
+        if provider.api_key_encrypted:
+            fernet = Fernet(app.config['ENCRYPTION_KEY'])
+            api_key = fernet.decrypt(provider.api_key_encrypted).decode()
+        return jsonify({"id": provider.id, "name": provider.name, "api_url": provider.api_url, "api_key": api_key})
     elif request.method == 'DELETE':
         db.session.delete(provider)
         db.session.commit()
