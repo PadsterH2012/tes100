@@ -219,7 +219,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('ai-agent-form').addEventListener('submit', (e) => {
         e.preventDefault();
-        const configId = document.getElementById('config-id').value;
         const data = {
             agent_type: document.getElementById('agent-type').value,
             provider_id: document.getElementById('provider-select').value,
@@ -227,11 +226,8 @@ document.addEventListener('DOMContentLoaded', () => {
             system_prompt: document.getElementById('system-prompt').value
         };
         
-        const url = configId ? `/api/ai_agent_configs/${configId}` : '/api/ai_agent_configs';
-        const method = configId ? 'PUT' : 'POST';
-        
-        fetch(url, {
-            method: method,
+        fetch('/api/ai_agent_configs', {
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
