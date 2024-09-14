@@ -203,12 +203,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function editProvider(providerId) {
         fetch(`/api/ai_providers/${providerId}`)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(provider => {
-                document.getElementById('provider-id').value = provider.id;
-                document.getElementById('provider-name').value = provider.name;
-                document.getElementById('api-url').value = provider.api_url;
-                document.getElementById('api-key').value = provider.api_key;
+                document.getElementById('provider-id').value = provider.id || '';
+                document.getElementById('provider-name').value = provider.name || '';
+                document.getElementById('api-url').value = provider.api_url || '';
+                document.getElementById('api-key').value = provider.api_key || '';
+            })
+            .catch(error => {
+                console.error('Error fetching provider data:', error);
+                alert('Failed to load provider data. Please try again.');
             });
     }
 
