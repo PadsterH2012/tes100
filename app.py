@@ -208,7 +208,7 @@ def ai_agent_config(config_id):
             "provider_id": config.provider_id,
             "model_name": config.model_name,
             "system_prompt": config.system_prompt
-        })
+        }), 200  # Explicitly return 200 status code
     elif request.method == 'DELETE':
         db.session.delete(config)
         db.session.commit()
