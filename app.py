@@ -171,7 +171,7 @@ def ai_agent_configs():
                 agent_type=data['agent_type'],
                 provider_id=data['provider_id'],
                 model_name=data['model_name'],
-                system_prompt=data['system_prompt']
+                system_prompt=data.get('system_prompt') or PREDEFINED_SYSTEM_PROMPTS.get(data['agent_type'], "")
             )
             db.session.add(new_config)
             db.session.commit()
