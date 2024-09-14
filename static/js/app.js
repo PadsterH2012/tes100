@@ -109,6 +109,13 @@ document.addEventListener('DOMContentLoaded', () => {
         settingsSection.style.display = 'none';
         loadProjectDocuments(projectId);
         loadProjectConversations(projectId);
+        
+        // Fetch and set the project name
+        fetch(`/api/projects/${projectId}`)
+            .then(response => response.json())
+            .then(project => {
+                document.getElementById('project-name').textContent = project.name;
+            });
     }
 
     navProjects.addEventListener('click', (e) => {
