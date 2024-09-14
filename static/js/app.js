@@ -103,14 +103,14 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(data => {
                 if (data.error) {
                     console.error('Error:', data.error);
-                    displayMessage({ agent_type: 'ai', content: 'Sorry, an error occurred.' });
+                    displayMessage({ agent_type: 'Project Assistant', content: 'Sorry, an error occurred.' });
                 } else {
-                    displayMessage({ agent_type: 'ai', content: data.response });
+                    displayMessage({ agent_type: 'Project Assistant', content: data.response });
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                displayMessage({ agent_type: 'ai', content: 'Sorry, an error occurred.' });
+                displayMessage({ agent_type: 'Project Assistant', content: 'Sorry, an error occurred.' });
             });
         }
     }
@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function displayMessage(message) {
         const messageElement = document.createElement('div');
-        messageElement.classList.add('message', message.agent_type);
+        messageElement.classList.add('message', message.agent_type.toLowerCase());
         messageElement.textContent = message.content;
         chatMessages.appendChild(messageElement);
         chatMessages.scrollTop = chatMessages.scrollHeight;
