@@ -205,7 +205,9 @@ document.addEventListener('DOMContentLoaded', () => {
         fetch(`/api/ai_providers/${providerId}`)
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    return response.json().then(err => {
+                        throw new Error(err.error || 'Network response was not ok');
+                    });
                 }
                 return response.json();
             })
@@ -217,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .catch(error => {
                 console.error('Error fetching provider data:', error);
-                alert('Failed to load provider data. Please try again.');
+                alert(`Failed to load provider data: ${error.message}`);
             });
     }
 
