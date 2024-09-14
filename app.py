@@ -45,6 +45,7 @@ def init_db():
 
 @app.route('/')
 def index():
+    app.logger.debug("Index route hit")
     return render_template('index.html')
 
 @app.route('/api/projects', methods=['GET', 'POST'])
@@ -363,6 +364,6 @@ def chat():
 
 if __name__ == '__main__':
     init_db()
-    app.run(debug=False, host='127.0.0.1', port=int(os.environ.get('PORT', 8000)))
+    app.run(debug=True, host='127.0.0.1', port=int(os.environ.get('PORT', 8000)))
 else:
     init_db()
