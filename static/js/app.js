@@ -182,6 +182,21 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
+    function loadAgentTypes() {
+        fetch('/api/agent_types')
+            .then(response => response.json())
+            .then(agentTypes => {
+                const agentTypeSelect = document.getElementById('agent-type');
+                agentTypeSelect.innerHTML = '';
+                agentTypes.forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type;
+                    option.textContent = type;
+                    agentTypeSelect.appendChild(option);
+                });
+            });
+    }
+
     aiAgentForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const agentType = document.getElementById('agent-type').value;
@@ -201,12 +216,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 system_prompt: systemPrompt
             }),
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(() => {
             loadAgentConfigs();
             aiAgentForm.reset();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to save agent configuration. Please try again.');
         });
     });
+
+    // Call loadAgentTypes when the page loads
+    loadAgentTypes();
 
     function loadProjectConversations(projectId) {
         fetch(`/api/projects/${projectId}/conversations`)

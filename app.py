@@ -9,6 +9,8 @@ app = Flask(__name__)
 app.config.from_object(Config)
 db.init_app(app)
 
+AGENT_TYPES = ['Project Assistant', 'Writer', 'Architect', 'Developer', 'Tester']
+
 def init_db():
     with app.app_context():
         db.create_all()
@@ -141,6 +143,8 @@ def ai_providers():
 def ai_agent_configs():
     if request.method == 'POST':
         data = request.json
+        if data['agent_type'] not in AGENT_TYPES:
+            return jsonify({"error": "Invalid agent type"}), 400
         new_config = AIAgentConfig(
             agent_type=data['agent_type'],
             provider_id=data['provider_id'],
@@ -165,6 +169,10 @@ def ai_agent_configs():
             "model_name": c.model_name,
             "system_prompt": c.system_prompt
         } for c in configs])
+
+@app.route('/api/agent_types', methods=['GET'])
+def get_agent_types():
+    return jsonify(AGENT_TYPES)
 
 if __name__ == '__main__':
     init_db()
