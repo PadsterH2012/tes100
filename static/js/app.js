@@ -135,6 +135,12 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(response => response.json())
             .then(project => {
                 document.getElementById('project-name').textContent = project.name;
+                document.getElementById('project-documents-title').textContent = `Project - ${project.name}`;
+            });
+        fetch(`/api/projects/${projectId}`)
+            .then(response => response.json())
+            .then(project => {
+                document.getElementById('project-name').textContent = project.name;
             });
     }
 
