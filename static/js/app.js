@@ -160,11 +160,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('project-name').textContent = project.name;
                 document.getElementById('project-documents-title').textContent = `Project - ${project.name}`;
             });
-        fetch(`/api/projects/${projectId}`)
-            .then(response => response.json())
-            .then(project => {
-                document.getElementById('project-name').textContent = project.name;
-            });
     }
 
     navProjects.addEventListener('click', (e) => {
@@ -514,7 +509,12 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(response => response.json())
             .then(conversations => {
                 chatMessages.innerHTML = '';
-                conversations.forEach(displayMessage);
+                conversations.forEach(conversation => {
+                    displayMessage({
+                        agent_type: conversation.agent_type,
+                        content: conversation.content
+                    });
+                });
             });
     }
 

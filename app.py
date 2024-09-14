@@ -345,13 +345,21 @@ def chat():
 
         ai_response = response.json()['choices'][0]['message']['content']
         
-        # Save the conversation
-        new_conversation = Conversation(
+        # Save the user message
+        user_conversation = Conversation(
+            project_id=project_id,
+            agent_type='user',
+            content=message
+        )
+        db.session.add(user_conversation)
+
+        # Save the AI response
+        ai_conversation = Conversation(
             project_id=project_id,
             agent_type=agent_type,
-            content=f"User: {message}\nAI: {ai_response}"
+            content=ai_response
         )
-        db.session.add(new_conversation)
+        db.session.add(ai_conversation)
         db.session.commit()
 
         return jsonify({"response": ai_response})
