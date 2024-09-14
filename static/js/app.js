@@ -42,14 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(response => response.json())
             .then(documents => {
                 documentContent.innerHTML = '';
-                documents.forEach(doc => {
-                    const docElement = document.createElement('div');
-                    docElement.innerHTML = `
-                        <h3>${doc.doc_type}</h3>
-                        <p>${doc.content}</p>
-                    `;
-                    documentContent.appendChild(docElement);
-                });
+                // We're not displaying the document content anymore
             });
     }
 
