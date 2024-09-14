@@ -72,6 +72,37 @@ def get_documents(project_id):
         "content": doc.content
     } for doc in documents])
 
+@app.route('/api/projects/<int:project_id>/conversations', methods=['POST'])
+def create_conversation(project_id):
+    project = Project.query.get_or_404(project_id)
+    data = request.json
+    new_conversation = Conversation(
+        project_id=project.id,
+        agent_type=data['agent_type'],
+        content=data['content']
+    )
+    db.session.add(new_conversation)
+    db.session.commit()
+    return jsonify({
+        "id": new_conversation.id,
+        "project_id": new_conversation.project_id,
+        "agent_type": new_conversation.agent_type,
+        "content": new_conversation.content,
+        "timestamp": new_conversation.timestamp.isoformat()
+    }), 201
+
+@app.route('/api/projects/<int:project_id>/conversations', methods=['GET'])
+def get_conversations(project_id):
+    project = Project.query.get_or_404(project_id)
+    conversations = Conversation.query.filter_by(project_id=project.id).order_by(Conversation.timestamp).all()
+    return jsonify([{
+        "id": conv.id,
+        "project_id": conv.project_id,
+        "agent_type": conv.agent_type,
+        "content": conv.content,
+        "timestamp": conv.timestamp.isoformat()
+    } for conv in conversations])
+
 if __name__ == '__main__':
     init_db()
     app.run(debug=False, host='127.0.0.1', port=int(os.environ.get('PORT', 8000)))

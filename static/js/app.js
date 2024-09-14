@@ -62,11 +62,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
     sendMessageButton.addEventListener('click', () => {
         const message = chatInput.value.trim();
-        if (message) {
-            // Send message to AI and handle response
-            chatInput.value = '';
+        if (message && currentProjectId) {
+            fetch(`/api/projects/${currentProjectId}/conversations`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ agent_type: 'user', content: message }),
+            })
+            .then(response => response.json())
+            .then(conversation => {
+                displayMessage(conversation);
+                chatInput.value = '';
+                // Here you would typically call a function to get the AI's response
+                // For now, we'll just log the message
+                console.log('User message sent:', message);
+            });
         }
     });
+
+    function displayMessage(message) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add(message.agent_type);
+        messageElement.textContent = message.content;
+        chatMessages.appendChild(messageElement);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
 
     loadProjects();
 
@@ -77,6 +98,16 @@ document.addEventListener('DOMContentLoaded', () => {
         chatInterface.style.display = 'block';
         documentDisplay.style.display = 'block';
         loadProjectDocuments(projectId);
+        loadProjectConversations(projectId);
+    }
+
+    function loadProjectConversations(projectId) {
+        fetch(`/api/projects/${projectId}/conversations`)
+            .then(response => response.json())
+            .then(conversations => {
+                chatMessages.innerHTML = '';
+                conversations.forEach(displayMessage);
+            });
     }
 
     const newDocumentForm = document.getElementById('new-document-form');
