@@ -146,16 +146,22 @@ def ai_providers():
                 return jsonify({"error": "Provider not found"}), 404
             provider.name = data['name']
             provider.api_url = data['api_url']
-            provider.api_key = data['api_key']
+            if 'api_key' in data:
+                provider.api_key = data['api_key']
             db.session.commit()
         else:
             existing_provider = AIProvider.query.filter_by(name=data['name']).first()
             if existing_provider:
                 existing_provider.api_url = data['api_url']
-                existing_provider.api_key = data['api_key']
+                if 'api_key' in data:
+                    existing_provider.api_key = data['api_key']
                 provider = existing_provider
             else:
-                provider = AIProvider(name=data['name'], api_url=data['api_url'], api_key=data['api_key'])
+                provider = AIProvider(
+                    name=data['name'],
+                    api_url=data['api_url'],
+                    api_key=data.get('api_key')
+                )
                 db.session.add(provider)
             db.session.commit()
         return jsonify({"id": provider.id, "name": provider.name, "api_url": provider.api_url}), 200
