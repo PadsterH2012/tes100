@@ -141,7 +141,7 @@ def ai_providers():
         provider_id = data.get('id')
         
         if provider_id:
-            provider = AIProvider.query.get_or_404(provider_id)
+            provider = db.session.get(AIProvider,_or_404(provider_id)
             provider.name = data['name']
             provider.api_url = data['api_url']
         else:
@@ -165,7 +165,7 @@ def ai_providers():
 
 @app.route('/api/ai_providers/<int:provider_id>', methods=['GET', 'DELETE'])
 def ai_provider(provider_id):
-    provider = AIProvider.query.get_or_404(provider_id)
+    provider = db.session.get(AIProvider,_or_404(provider_id)
     if request.method == 'GET':
         api_key = ''
         if provider.api_key_encrypted:
