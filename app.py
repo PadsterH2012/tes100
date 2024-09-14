@@ -146,14 +146,16 @@ def ai_providers():
                 return jsonify({"error": "Provider not found"}), 404
             provider.name = data['name']
             provider.api_url = data['api_url']
+            provider.api_key = data['api_key']
             db.session.commit()
         else:
             existing_provider = AIProvider.query.filter_by(name=data['name']).first()
             if existing_provider:
                 existing_provider.api_url = data['api_url']
+                existing_provider.api_key = data['api_key']
                 provider = existing_provider
             else:
-                provider = AIProvider(name=data['name'], api_url=data['api_url'])
+                provider = AIProvider(name=data['name'], api_url=data['api_url'], api_key=data['api_key'])
                 db.session.add(provider)
             db.session.commit()
         return jsonify({"id": provider.id, "name": provider.name, "api_url": provider.api_url}), 200
@@ -303,10 +305,10 @@ def chat():
         if not provider:
             return jsonify({"error": "AI provider not found"}), 404
 
-        # Get the API key from environment variables
-        api_key = os.environ.get(f"{provider.name.upper()}_API_KEY")
+        # Get the API key from the database
+        api_key = provider.api_key
         if not api_key:
-            app.logger.error(f"API key for {provider.name} not found in environment variables")
+            app.logger.error(f"API key for {provider.name} not found in the database")
             return jsonify({"error": f"API key for {provider.name} not configured"}), 500
 
         # Prepare the chat message
