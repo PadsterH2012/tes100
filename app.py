@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
+import base64
 from models import db, Project, ProjectDocument, Conversation, AIProvider, AIAgentConfig
 import os
 from cryptography.fernet import Fernet, InvalidToken
@@ -42,6 +43,11 @@ def init_db():
                 db.session.add(new_provider)
         
         db.session.commit()
+
+    # Ensure the encryption key is set
+    if 'ENCRYPTION_KEY' not in app.config or not app.config['ENCRYPTION_KEY']:
+        app.config['ENCRYPTION_KEY'] = Fernet.generate_key()
+        print("WARNING: ENCRYPTION_KEY not set in environment. Generated new key:", base64.b64encode(app.config['ENCRYPTION_KEY']).decode())
 
 @app.route('/')
 def index():

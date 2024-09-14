@@ -8,4 +8,4 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Encryption key for API keys
-    ENCRYPTION_KEY = Fernet.generate_key()
+    ENCRYPTION_KEY = os.environ.get('ENCRYPTION_KEY') or Fernet.generate_key()
