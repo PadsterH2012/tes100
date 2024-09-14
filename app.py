@@ -42,6 +42,35 @@ def project(project_id):
         db.session.commit()
         return '', 204
 
+@app.route('/api/projects/<int:project_id>/documents', methods=['POST'])
+def create_document(project_id):
+    project = Project.query.get_or_404(project_id)
+    data = request.json
+    new_document = ProjectDocument(
+        project_id=project.id,
+        doc_type=data['doc_type'],
+        content=data['content']
+    )
+    db.session.add(new_document)
+    db.session.commit()
+    return jsonify({
+        "id": new_document.id,
+        "project_id": new_document.project_id,
+        "doc_type": new_document.doc_type,
+        "content": new_document.content
+    }), 201
+
+@app.route('/api/projects/<int:project_id>/documents', methods=['GET'])
+def get_documents(project_id):
+    project = Project.query.get_or_404(project_id)
+    documents = ProjectDocument.query.filter_by(project_id=project.id).all()
+    return jsonify([{
+        "id": doc.id,
+        "project_id": doc.project_id,
+        "doc_type": doc.doc_type,
+        "content": doc.content
+    } for doc in documents])
+
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)
