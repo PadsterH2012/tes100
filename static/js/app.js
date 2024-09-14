@@ -211,11 +211,10 @@ document.addEventListener('DOMContentLoaded', () => {
             api_key: document.getElementById('api-key').value
         };
     
-        const method = providerId ? 'PUT' : 'POST';
         const url = providerId ? `/api/ai_providers/${providerId}` : '/api/ai_providers';
     
         fetch(url, {
-            method: method,
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },

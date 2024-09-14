@@ -137,34 +137,31 @@ def get_conversations(project_id):
 def ai_providers():
     if request.method == 'POST':
         data = request.json
-        fernet = Fernet(app.config['ENCRYPTION_KEY'])
-        encrypted_api_key = fernet.encrypt(data['api_key'].encode())
-        new_provider = AIProvider(
-            name=data['name'],
-            api_url=data['api_url'],
-            api_key_encrypted=encrypted_api_key
-        )
-        db.session.add(new_provider)
+        provider_id = data.get('id')
+        
+        if provider_id:
+            provider = AIProvider.query.get_or_404(provider_id)
+            provider.name = data['name']
+            provider.api_url = data['api_url']
+        else:
+            provider = AIProvider(name=data['name'], api_url=data['api_url'])
+            db.session.add(provider)
+        
+        if 'api_key' in data and data['api_key']:
+            fernet = Fernet(app.config['ENCRYPTION_KEY'])
+            provider.api_key_encrypted = fernet.encrypt(data['api_key'].encode())
+        
         db.session.commit()
-        return jsonify({"id": new_provider.id, "name": new_provider.name, "api_url": new_provider.api_url}), 201
+        return jsonify({"id": provider.id, "name": provider.name, "api_url": provider.api_url}), 200
     else:
         providers = AIProvider.query.all()
         return jsonify([{"id": p.id, "name": p.name, "api_url": p.api_url} for p in providers])
 
-@app.route('/api/ai_providers/<int:provider_id>', methods=['GET', 'PUT', 'DELETE'])
+@app.route('/api/ai_providers/<int:provider_id>', methods=['GET', 'DELETE'])
 def ai_provider(provider_id):
     provider = AIProvider.query.get_or_404(provider_id)
     if request.method == 'GET':
         return jsonify({"id": provider.id, "name": provider.name, "api_url": provider.api_url})
-    elif request.method == 'PUT':
-        data = request.json
-        provider.name = data.get('name', provider.name)
-        provider.api_url = data.get('api_url', provider.api_url)
-        if 'api_key' in data:
-            fernet = Fernet(app.config['ENCRYPTION_KEY'])
-            provider.api_key_encrypted = fernet.encrypt(data['api_key'].encode())
-        db.session.commit()
-        return jsonify({"id": provider.id, "name": provider.name, "api_url": provider.api_url}), 200
     elif request.method == 'DELETE':
         db.session.delete(provider)
         db.session.commit()
