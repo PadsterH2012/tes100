@@ -197,6 +197,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
+    // Call loadAgentTypes when the page loads
+    loadAgentTypes();
+
     aiAgentForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const agentType = document.getElementById('agent-type').value;
