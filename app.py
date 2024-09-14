@@ -1,10 +1,8 @@
 from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
-import base64
 from models import db, Project, ProjectDocument, Conversation, AIProvider, AIAgentConfig
 import os
-from cryptography.fernet import Fernet, InvalidToken
 import requests
 
 app = Flask(__name__)
@@ -43,11 +41,6 @@ def init_db():
                 db.session.add(new_provider)
         
         db.session.commit()
-
-    # Ensure the encryption key is set
-    if 'ENCRYPTION_KEY' not in app.config or not app.config['ENCRYPTION_KEY']:
-        app.config['ENCRYPTION_KEY'] = Fernet.generate_key()
-        print("WARNING: ENCRYPTION_KEY not set in environment. Generated new key:", base64.b64encode(app.config['ENCRYPTION_KEY']).decode())
 
 @app.route('/')
 def index():
@@ -153,23 +146,14 @@ def ai_providers():
                 return jsonify({"error": "Provider not found"}), 404
             provider.name = data['name']
             provider.api_url = data['api_url']
-            if 'api_key' in data and data['api_key']:
-                fernet = Fernet(app.config['ENCRYPTION_KEY'])
-                provider.api_key_encrypted = fernet.encrypt(data['api_key'].encode())
             db.session.commit()
         else:
             existing_provider = AIProvider.query.filter_by(name=data['name']).first()
             if existing_provider:
                 existing_provider.api_url = data['api_url']
-                if 'api_key' in data and data['api_key']:
-                    fernet = Fernet(app.config['ENCRYPTION_KEY'])
-                    existing_provider.api_key_encrypted = fernet.encrypt(data['api_key'].encode())
                 provider = existing_provider
             else:
                 provider = AIProvider(name=data['name'], api_url=data['api_url'])
-                if 'api_key' in data and data['api_key']:
-                    fernet = Fernet(app.config['ENCRYPTION_KEY'])
-                    provider.api_key_encrypted = fernet.encrypt(data['api_key'].encode())
                 db.session.add(provider)
             db.session.commit()
         return jsonify({"id": provider.id, "name": provider.name, "api_url": provider.api_url}), 200
@@ -319,13 +303,11 @@ def chat():
         if not provider:
             return jsonify({"error": "AI provider not found"}), 404
 
-        # Decrypt the API key
-        try:
-            fernet = Fernet(app.config['ENCRYPTION_KEY'])
-            api_key = fernet.decrypt(provider.api_key_encrypted).decode()
-        except (InvalidToken, TypeError, ValueError) as e:
-            app.logger.error(f"Error decrypting API key: {str(e)}")
-            return jsonify({"error": "Unable to decrypt API key"}), 500
+        # Get the API key from environment variables
+        api_key = os.environ.get(f"{provider.name.upper()}_API_KEY")
+        if not api_key:
+            app.logger.error(f"API key for {provider.name} not found in environment variables")
+            return jsonify({"error": f"API key for {provider.name} not configured"}), 500
 
         # Prepare the chat message
         chat_message = {

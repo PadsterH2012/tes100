@@ -28,7 +28,6 @@ class AIProvider(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
     api_url = db.Column(db.String(200), nullable=False)
-    api_key_encrypted = db.Column(db.LargeBinary)
 
 class AIAgentConfig(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -160,14 +160,13 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const providerName = document.getElementById('provider-name').value;
         const apiUrl = document.getElementById('api-url').value;
-        const apiKey = document.getElementById('api-key').value;
 
         fetch('/api/ai_providers', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ name: providerName, api_url: apiUrl, api_key: apiKey }),
+            body: JSON.stringify({ name: providerName, api_url: apiUrl }),
         })
         .then(response => response.json())
         .then(() => {
