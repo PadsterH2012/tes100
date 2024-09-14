@@ -306,7 +306,7 @@ def chat():
         return jsonify({"error": "Agent configuration not found"}), 404
 
     # Get the AI provider
-    provider = AIProvider.query.get(agent_config.provider_id)
+    provider = db.session.get(AIProvider, agent_config.provider_id)
     if not provider:
         return jsonify({"error": "AI provider not found"}), 404
 
