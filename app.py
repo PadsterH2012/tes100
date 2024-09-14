@@ -4,6 +4,7 @@ from config import Config
 from models import db, Project, ProjectDocument, Conversation, AIProvider, AIAgentConfig
 import os
 from cryptography.fernet import Fernet, InvalidToken
+import requests
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -291,6 +292,62 @@ def get_agent_system_prompt(agent_type):
         return jsonify({"system_prompt": PREDEFINED_SYSTEM_PROMPTS[agent_type]})
     else:
         return jsonify({"error": "Agent type not found"}), 404
+
+@app.route('/api/chat', methods=['POST'])
+def chat():
+    data = request.json
+    project_id = data.get('project_id')
+    message = data.get('message')
+    agent_type = 'Project Assistant'  # Hardcoded for now
+
+    # Get the AI agent configuration
+    agent_config = AIAgentConfig.query.filter_by(agent_type=agent_type).first()
+    if not agent_config:
+        return jsonify({"error": "Agent configuration not found"}), 404
+
+    # Get the AI provider
+    provider = AIProvider.query.get(agent_config.provider_id)
+    if not provider:
+        return jsonify({"error": "AI provider not found"}), 404
+
+    # Decrypt the API key
+    try:
+        fernet = Fernet(app.config['ENCRYPTION_KEY'])
+        api_key = fernet.decrypt(provider.api_key_encrypted).decode()
+    except (InvalidToken, TypeError, ValueError):
+        return jsonify({"error": "Unable to decrypt API key"}), 500
+
+    # Prepare the chat message
+    chat_message = {
+        "model": agent_config.model_name,
+        "messages": [
+            {"role": "system", "content": agent_config.system_prompt},
+            {"role": "user", "content": message}
+        ]
+    }
+
+    # Send request to the AI provider
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_key}"
+    }
+    response = requests.post(provider.api_url, json=chat_message, headers=headers)
+
+    if response.status_code == 200:
+        ai_response = response.json()['choices'][0]['message']['content']
+        
+        # Save the conversation
+        new_conversation = Conversation(
+            project_id=project_id,
+            agent_type=agent_type,
+            content=f"User: {message}\nAI: {ai_response}"
+        )
+        db.session.add(new_conversation)
+        db.session.commit()
+
+        return jsonify({"response": ai_response})
+    else:
+        return jsonify({"error": "Failed to get response from AI provider"}), response.status_code
 
 if __name__ == '__main__':
     init_db()

@@ -71,20 +71,30 @@ document.addEventListener('DOMContentLoaded', () => {
     sendMessageButton.addEventListener('click', () => {
         const message = chatInput.value.trim();
         if (message && currentProjectId) {
-            fetch(`/api/projects/${currentProjectId}/conversations`, {
+            // Display user message
+            displayMessage({ agent_type: 'user', content: message });
+            chatInput.value = '';
+
+            // Send message to AI
+            fetch('/api/chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ agent_type: 'user', content: message }),
+                body: JSON.stringify({ project_id: currentProjectId, message: message }),
             })
             .then(response => response.json())
-            .then(conversation => {
-                displayMessage(conversation);
-                chatInput.value = '';
-                // Here you would typically call a function to get the AI's response
-                // For now, we'll just log the message
-                console.log('User message sent:', message);
+            .then(data => {
+                if (data.error) {
+                    console.error('Error:', data.error);
+                    displayMessage({ agent_type: 'ai', content: 'Sorry, an error occurred.' });
+                } else {
+                    displayMessage({ agent_type: 'ai', content: data.response });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                displayMessage({ agent_type: 'ai', content: 'Sorry, an error occurred.' });
             });
         }
     });
