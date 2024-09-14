@@ -226,32 +226,25 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        fetch('/api/ai_agent_configs')
-            .then(response => response.json())
-            .then(configs => {
-                const updatePromises = configs.map(config => 
-                    fetch(`/api/ai_agent_configs/${config.id}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            provider_id: providerId,
-                            model_name: modelName
-                        }),
-                    })
-                );
-
-                Promise.all(updatePromises)
-                    .then(() => {
-                        alert('Model applied to all agents successfully!');
-                        loadAgentConfigs();
-                    })
-                    .catch(error => {
-                        console.error('Error updating configurations:', error);
-                        alert('An error occurred while updating configurations. Please try again.');
-                    });
-            });
+        fetch('/api/ai_agent_configs/apply_to_all', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                provider_id: providerId,
+                model_name: modelName
+            }),
+        })
+        .then(response => response.json())
+        .then(result => {
+            alert(result.message);
+            loadAgentConfigs();
+        })
+        .catch(error => {
+            console.error('Error updating configurations:', error);
+            alert('An error occurred while updating configurations. Please try again.');
+        });
     });
 
     document.getElementById('ai-agent-form').addEventListener('submit', (e) => {

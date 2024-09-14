@@ -226,6 +226,32 @@ def ai_agent_config(config_id):
         db.session.commit()
         return '', 204
 
+@app.route('/api/ai_agent_configs/apply_to_all', methods=['POST'])
+def apply_to_all_agents():
+    data = request.json
+    provider_id = data.get('provider_id')
+    model_name = data.get('model_name')
+
+    if not provider_id or not model_name:
+        return jsonify({"error": "Provider ID and model name are required"}), 400
+
+    for agent_type in AGENT_TYPES:
+        config = AIAgentConfig.query.filter_by(agent_type=agent_type).first()
+        if config:
+            config.provider_id = provider_id
+            config.model_name = model_name
+        else:
+            new_config = AIAgentConfig(
+                agent_type=agent_type,
+                provider_id=provider_id,
+                model_name=model_name,
+                system_prompt=PREDEFINED_SYSTEM_PROMPTS.get(agent_type, "")
+            )
+            db.session.add(new_config)
+
+    db.session.commit()
+    return jsonify({"message": "Model applied to all agents successfully!"}), 200
+
 @app.route('/api/agent_types', methods=['GET'])
 def get_agent_types():
     return jsonify(AGENT_TYPES)
