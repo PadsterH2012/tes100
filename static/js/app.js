@@ -132,6 +132,29 @@ document.addEventListener('DOMContentLoaded', () => {
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
+    function clearChatMessages() {
+        chatMessages.innerHTML = '';
+    }
+
+    function selectProject(projectId) {
+        currentProjectId = projectId;
+        document.getElementById('project-list').style.display = 'none';
+        chatInterface.style.display = 'block';
+        documentDisplay.style.display = 'block';
+        settingsSection.style.display = 'none';
+        clearChatMessages();
+        loadProjectDocuments(projectId);
+        loadChatHistory(projectId);
+    
+        // Fetch and set the project name
+        fetch(`/api/projects/${projectId}`)
+            .then(response => response.json())
+            .then(project => {
+                document.getElementById('project-name').textContent = project.name;
+                document.getElementById('project-documents-title').textContent = `Project - ${project.name}`;
+            });
+    }
+
     loadProjects();
     loadProviders();
 
