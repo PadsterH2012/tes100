@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    sendMessageButton.addEventListener('click', () => {
+    function sendMessage() {
         const message = chatInput.value.trim();
         if (message && currentProjectId) {
             // Display user message
@@ -96,6 +96,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Error:', error);
                 displayMessage({ agent_type: 'ai', content: 'Sorry, an error occurred.' });
             });
+        }
+    }
+
+    sendMessageButton.addEventListener('click', sendMessage);
+
+    chatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
         }
     });
 
