@@ -250,17 +250,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const url = providerId ? `/api/ai_providers/${providerId}` : '/api/ai_providers';
     
         fetch(url, {
-            method: 'POST',
+            method: providerId ? 'PUT' : 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(data),
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(() => {
             loadProviders();
             document.getElementById('ai-provider-form').reset();
             document.getElementById('provider-id').value = '';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to save provider. Please try again.');
         });
     });
 

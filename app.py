@@ -169,13 +169,21 @@ def ai_providers():
         providers = AIProvider.query.all()
         return jsonify([{"id": p.id, "name": p.name, "api_url": p.api_url} for p in providers])
 
-@app.route('/api/ai_providers/<int:provider_id>', methods=['GET', 'DELETE'])
+@app.route('/api/ai_providers/<int:provider_id>', methods=['GET', 'PUT', 'DELETE'])
 def ai_provider(provider_id):
     provider = db.session.get(AIProvider, provider_id)
     if provider is None:
         return jsonify({"error": "Provider not found"}), 404
     if request.method == 'GET':
         return jsonify({"id": provider.id, "name": provider.name, "api_url": provider.api_url})
+    elif request.method == 'PUT':
+        data = request.json
+        provider.name = data.get('name', provider.name)
+        provider.api_url = data.get('api_url', provider.api_url)
+        if 'api_key' in data:
+            provider.api_key = data['api_key']
+        db.session.commit()
+        return jsonify({"id": provider.id, "name": provider.name, "api_url": provider.api_url}), 200
     elif request.method == 'DELETE':
         db.session.delete(provider)
         db.session.commit()
