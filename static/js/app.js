@@ -114,6 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function selectProject(projectId) {
         currentProjectId = projectId;
+        document.getElementById('project-list').style.display = 'none';
         chatInterface.style.display = 'block';
         documentDisplay.style.display = 'block';
         settingsSection.style.display = 'none';
@@ -130,10 +131,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     navProjects.addEventListener('click', (e) => {
         e.preventDefault();
+        currentProjectId = null;
         chatInterface.style.display = 'none';
         documentDisplay.style.display = 'none';
         settingsSection.style.display = 'none';
         document.getElementById('project-list').style.display = 'block';
+        document.getElementById('project-name').textContent = '';
     });
 
     navSettings.addEventListener('click', (e) => {
