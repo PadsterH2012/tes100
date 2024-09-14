@@ -217,6 +217,43 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('config-id').value = '';
     });
 
+    document.getElementById('apply-model-to-all').addEventListener('click', () => {
+        const providerId = document.getElementById('provider-select').value;
+        const modelName = document.getElementById('model-name').value;
+        
+        if (!providerId || !modelName) {
+            alert('Please select a provider and enter a model name before applying to all agents.');
+            return;
+        }
+
+        fetch('/api/ai_agent_configs')
+            .then(response => response.json())
+            .then(configs => {
+                const updatePromises = configs.map(config => 
+                    fetch(`/api/ai_agent_configs/${config.id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            provider_id: providerId,
+                            model_name: modelName
+                        }),
+                    })
+                );
+
+                Promise.all(updatePromises)
+                    .then(() => {
+                        alert('Model applied to all agents successfully!');
+                        loadAgentConfigs();
+                    })
+                    .catch(error => {
+                        console.error('Error updating configurations:', error);
+                        alert('An error occurred while updating configurations. Please try again.');
+                    });
+            });
+    });
+
     document.getElementById('ai-agent-form').addEventListener('submit', (e) => {
         e.preventDefault();
         const data = {
