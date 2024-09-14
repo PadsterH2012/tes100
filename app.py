@@ -182,6 +182,38 @@ def ai_agent_configs():
             "system_prompt": c.system_prompt
         } for c in configs])
 
+@app.route('/api/ai_agent_configs/<int:config_id>', methods=['GET', 'PUT', 'DELETE'])
+def ai_agent_config(config_id):
+    config = AIAgentConfig.query.get_or_404(config_id)
+    if request.method == 'GET':
+        return jsonify({
+            "id": config.id,
+            "agent_type": config.agent_type,
+            "provider_id": config.provider_id,
+            "model_name": config.model_name,
+            "system_prompt": config.system_prompt
+        })
+    elif request.method == 'PUT':
+        data = request.json
+        if 'agent_type' in data and data['agent_type'] not in AGENT_TYPES:
+            return jsonify({"error": "Invalid agent type"}), 400
+        config.agent_type = data.get('agent_type', config.agent_type)
+        config.provider_id = data.get('provider_id', config.provider_id)
+        config.model_name = data.get('model_name', config.model_name)
+        config.system_prompt = data.get('system_prompt', config.system_prompt)
+        db.session.commit()
+        return jsonify({
+            "id": config.id,
+            "agent_type": config.agent_type,
+            "provider_id": config.provider_id,
+            "model_name": config.model_name,
+            "system_prompt": config.system_prompt
+        })
+    elif request.method == 'DELETE':
+        db.session.delete(config)
+        db.session.commit()
+        return '', 204
+
 @app.route('/api/agent_types', methods=['GET'])
 def get_agent_types():
     return jsonify(AGENT_TYPES)

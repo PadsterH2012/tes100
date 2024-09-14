@@ -63,6 +63,7 @@
             <div id="ai-agent-settings">
                 <h3>AI Agent Settings</h3>
                 <form id="ai-agent-form">
+                    <input type="hidden" id="config-id">
                     <label for="agent-type">Agent Type:</label>
                     <select id="agent-type" required></select>
                     <label for="provider-select">Provider:</label>
@@ -72,6 +73,7 @@
                     <label for="system-prompt">System Prompt:</label>
                     <textarea id="system-prompt" rows="10" cols="50" required></textarea>
                     <button type="submit">Save Agent Configuration</button>
+                    <button type="button" id="clear-form">Clear Form</button>
                 </form>
                 <h4>Existing Agent Configurations</h4>
                 <ul id="agent-config-list"></ul>
