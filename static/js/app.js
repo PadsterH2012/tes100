@@ -156,6 +156,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 providers.forEach(provider => {
                     const li = document.createElement('li');
                     li.textContent = `${provider.name} - ${provider.api_url}`;
+                
+                    const editButton = document.createElement('button');
+                    editButton.textContent = 'Edit';
+                    editButton.addEventListener('click', () => editProvider(provider.id));
+                
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Delete';
+                    deleteButton.addEventListener('click', () => deleteProvider(provider.id));
+                
+                    li.appendChild(editButton);
+                    li.appendChild(deleteButton);
                     providerList.appendChild(li);
 
                     const option = document.createElement('option');
@@ -165,6 +176,56 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             });
     }
+
+    function editProvider(providerId) {
+        fetch(`/api/ai_providers/${providerId}`)
+            .then(response => response.json())
+            .then(provider => {
+                document.getElementById('provider-id').value = provider.id;
+                document.getElementById('provider-name').value = provider.name;
+                document.getElementById('api-url').value = provider.api_url;
+                document.getElementById('api-key').value = ''; // Clear for security reasons
+            });
+    }
+
+    function deleteProvider(providerId) {
+        if (confirm('Are you sure you want to delete this provider?')) {
+            fetch(`/api/ai_providers/${providerId}`, { method: 'DELETE' })
+                .then(() => loadProviders());
+        }
+    }
+
+    document.getElementById('ai-provider-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const providerId = document.getElementById('provider-id').value;
+        const data = {
+            name: document.getElementById('provider-name').value,
+            api_url: document.getElementById('api-url').value,
+            api_key: document.getElementById('api-key').value
+        };
+    
+        const method = providerId ? 'PUT' : 'POST';
+        const url = providerId ? `/api/ai_providers/${providerId}` : '/api/ai_providers';
+    
+        fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        })
+        .then(response => response.json())
+        .then(() => {
+            loadProviders();
+            document.getElementById('ai-provider-form').reset();
+            document.getElementById('provider-id').value = '';
+        });
+    });
+
+    document.getElementById('clear-provider-form').addEventListener('click', () => {
+        document.getElementById('ai-provider-form').reset();
+        document.getElementById('provider-id').value = '';
+    });
 
     // Call loadProviders when the page loads
     loadProviders();

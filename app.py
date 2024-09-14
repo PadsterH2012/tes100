@@ -151,6 +151,25 @@ def ai_providers():
         providers = AIProvider.query.all()
         return jsonify([{"id": p.id, "name": p.name, "api_url": p.api_url} for p in providers])
 
+@app.route('/api/ai_providers/<int:provider_id>', methods=['GET', 'PUT', 'DELETE'])
+def ai_provider(provider_id):
+    provider = AIProvider.query.get_or_404(provider_id)
+    if request.method == 'GET':
+        return jsonify({"id": provider.id, "name": provider.name, "api_url": provider.api_url})
+    elif request.method == 'PUT':
+        data = request.json
+        provider.name = data.get('name', provider.name)
+        provider.api_url = data.get('api_url', provider.api_url)
+        if 'api_key' in data:
+            fernet = Fernet(app.config['ENCRYPTION_KEY'])
+            provider.api_key_encrypted = fernet.encrypt(data['api_key'].encode())
+        db.session.commit()
+        return jsonify({"id": provider.id, "name": provider.name, "api_url": provider.api_url}), 200
+    elif request.method == 'DELETE':
+        db.session.delete(provider)
+        db.session.commit()
+        return '', 204
+
 @app.route('/api/ai_agent_configs', methods=['GET', 'POST'])
 def ai_agent_configs():
     if request.method == 'POST':
