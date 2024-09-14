@@ -157,21 +157,37 @@ def ai_agent_configs():
         data = request.json
         if data['agent_type'] not in AGENT_TYPES:
             return jsonify({"error": "Invalid agent type"}), 400
-        new_config = AIAgentConfig(
-            agent_type=data['agent_type'],
-            provider_id=data['provider_id'],
-            model_name=data['model_name'],
-            system_prompt=data['system_prompt']
-        )
-        db.session.add(new_config)
-        db.session.commit()
-        return jsonify({
-            "id": new_config.id,
-            "agent_type": new_config.agent_type,
-            "provider_id": new_config.provider_id,
-            "model_name": new_config.model_name,
-            "system_prompt": new_config.system_prompt
-        }), 201
+        
+        existing_config = AIAgentConfig.query.filter_by(agent_type=data['agent_type']).first()
+        
+        if existing_config:
+            existing_config.provider_id = data['provider_id']
+            existing_config.model_name = data['model_name']
+            existing_config.system_prompt = data['system_prompt']
+            db.session.commit()
+            return jsonify({
+                "id": existing_config.id,
+                "agent_type": existing_config.agent_type,
+                "provider_id": existing_config.provider_id,
+                "model_name": existing_config.model_name,
+                "system_prompt": existing_config.system_prompt
+            }), 200
+        else:
+            new_config = AIAgentConfig(
+                agent_type=data['agent_type'],
+                provider_id=data['provider_id'],
+                model_name=data['model_name'],
+                system_prompt=data['system_prompt']
+            )
+            db.session.add(new_config)
+            db.session.commit()
+            return jsonify({
+                "id": new_config.id,
+                "agent_type": new_config.agent_type,
+                "provider_id": new_config.provider_id,
+                "model_name": new_config.model_name,
+                "system_prompt": new_config.system_prompt
+            }), 201
     else:
         configs = AIAgentConfig.query.all()
         return jsonify([{
