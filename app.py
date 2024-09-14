@@ -184,7 +184,7 @@ def ai_provider(provider_id):
                 api_key = fernet.decrypt(provider.api_key_encrypted).decode()
             except (InvalidToken, TypeError, ValueError) as e:
                 app.logger.error(f"Error decrypting API key for provider {provider_id}: {str(e)}")
-                return jsonify({"error": f"Unable to decrypt API key: {str(e)}"}), 400
+                return jsonify({"error": "Unable to decrypt API key. The encryption key might have changed or the stored API key is invalid."}), 400
         return jsonify({"id": provider.id, "name": provider.name, "api_url": provider.api_url, "api_key": api_key})
     elif request.method == 'DELETE':
         db.session.delete(provider)

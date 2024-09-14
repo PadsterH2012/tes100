@@ -206,7 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(response => {
                 if (!response.ok) {
                     return response.json().then(err => {
-                        throw new Error(err.error || 'Network response was not ok');
+                        throw new Error(err.error || 'Failed to load provider data');
                     });
                 }
                 return response.json();
