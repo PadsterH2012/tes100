@@ -24,8 +24,17 @@
                 <button id="send-message">Send</button>
             </section>
             <section id="document-display" style="display: none;">
-                <h2>Project Document</h2>
+                <h2>Project Documents</h2>
                 <div id="document-content"></div>
+                <form id="new-document-form">
+                    <select id="doc-type">
+                        <option value="requirements">Requirements</option>
+                        <option value="design">Design</option>
+                        <option value="implementation">Implementation</option>
+                    </select>
+                    <textarea id="doc-content" placeholder="Enter document content"></textarea>
+                    <button type="submit">Add Document</button>
+                </form>
             </section>
         </main>
     </div>

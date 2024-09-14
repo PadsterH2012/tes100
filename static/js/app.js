@@ -26,6 +26,23 @@ document.addEventListener('DOMContentLoaded', () => {
         chatInterface.style.display = 'block';
         documentDisplay.style.display = 'block';
         // Load project details, chat history, and documents
+        loadProjectDocuments(projectId);
+    }
+
+    function loadProjectDocuments(projectId) {
+        fetch(`/api/projects/${projectId}/documents`)
+            .then(response => response.json())
+            .then(documents => {
+                documentContent.innerHTML = '';
+                documents.forEach(doc => {
+                    const docElement = document.createElement('div');
+                    docElement.innerHTML = `
+                        <h3>${doc.doc_type}</h3>
+                        <p>${doc.content}</p>
+                    `;
+                    documentContent.appendChild(docElement);
+                });
+            });
     }
 
     newProjectButton.addEventListener('click', () => {
@@ -52,4 +69,35 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     loadProjects();
+
+    let currentProjectId = null;
+
+    function selectProject(projectId) {
+        currentProjectId = projectId;
+        chatInterface.style.display = 'block';
+        documentDisplay.style.display = 'block';
+        loadProjectDocuments(projectId);
+    }
+
+    const newDocumentForm = document.getElementById('new-document-form');
+    newDocumentForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const docType = document.getElementById('doc-type').value;
+        const docContent = document.getElementById('doc-content').value;
+
+        if (currentProjectId && docType && docContent) {
+            fetch(`/api/projects/${currentProjectId}/documents`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ doc_type: docType, content: docContent }),
+            })
+            .then(response => response.json())
+            .then(() => {
+                loadProjectDocuments(currentProjectId);
+                document.getElementById('doc-content').value = '';
+            });
+        }
+    });
 });
