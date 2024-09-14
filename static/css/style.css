@@ -191,6 +191,11 @@ nav ul li a:hover {
     align-items: center;
 }
 
+.settings-list li .button-container {
+    display: flex;
+    gap: 0.25rem;
+}
+
 .settings-list li button {
     padding: 0.25rem 0.5rem;
     font-size: 0.8rem;

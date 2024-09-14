@@ -174,6 +174,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     const li = document.createElement('li');
                     li.textContent = `${provider.name} - ${provider.api_url}`;
                 
+                    const buttonContainer = document.createElement('div');
+                    buttonContainer.className = 'button-container';
+
                     const editButton = document.createElement('button');
                     editButton.textContent = 'Edit';
                     editButton.addEventListener('click', () => editProvider(provider.id));
@@ -182,8 +185,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     deleteButton.textContent = 'Delete';
                     deleteButton.addEventListener('click', () => deleteProvider(provider.id));
                 
-                    li.appendChild(editButton);
-                    li.appendChild(deleteButton);
+                    buttonContainer.appendChild(editButton);
+                    buttonContainer.appendChild(deleteButton);
+                    li.appendChild(buttonContainer);
                     providerList.appendChild(li);
 
                     const option = document.createElement('option');
@@ -255,6 +259,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     const li = document.createElement('li');
                     li.textContent = `${config.agent_type} - ${config.model_name}`;
                     
+                    const buttonContainer = document.createElement('div');
+                    buttonContainer.className = 'button-container';
+
                     const editButton = document.createElement('button');
                     editButton.textContent = 'Edit';
                     editButton.addEventListener('click', () => editAgentConfig(config.id));
@@ -263,8 +270,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     deleteButton.textContent = 'Delete';
                     deleteButton.addEventListener('click', () => deleteAgentConfig(config.id));
                     
-                    li.appendChild(editButton);
-                    li.appendChild(deleteButton);
+                    buttonContainer.appendChild(editButton);
+                    buttonContainer.appendChild(deleteButton);
+                    li.appendChild(buttonContainer);
                     agentConfigList.appendChild(li);
                 });
             });
