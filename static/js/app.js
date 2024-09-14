@@ -221,9 +221,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function loadChatHistory(projectId) {
+        console.log(`Loading chat history for project ID: ${projectId}`);
         fetch(`/api/projects/${projectId}/chat_history`)
-            .then(response => response.json())
+            .then(response => {
+                console.log('Chat history response status:', response.status);
+                return response.json();
+            })
             .then(history => {
+                console.log('Received chat history:', history);
                 chatMessages.innerHTML = '';
                 history.forEach(message => {
                     displayMessage(message);

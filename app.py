@@ -136,12 +136,16 @@ def get_conversations(project_id):
 
 @app.route('/api/projects/<int:project_id>/chat_history', methods=['GET'])
 def get_chat_history(project_id):
+    app.logger.debug(f"Fetching chat history for project_id: {project_id}")
     project = Project.query.get_or_404(project_id)
     conversations = Conversation.query.filter_by(project_id=project.id).order_by(Conversation.timestamp).all()
-    return jsonify([{
+    app.logger.debug(f"Found {len(conversations)} conversations for project_id: {project_id}")
+    chat_history = [{
         "agent_type": conv.agent_type,
         "content": conv.content
-    } for conv in conversations])
+    } for conv in conversations]
+    app.logger.debug(f"Returning chat history: {chat_history}")
+    return jsonify(chat_history)
 
 @app.route('/api/ai_providers', methods=['GET', 'POST'])
 def ai_providers():
