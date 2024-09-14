@@ -295,45 +295,48 @@ def get_agent_system_prompt(agent_type):
 
 @app.route('/api/chat', methods=['POST'])
 def chat():
-    data = request.json
-    project_id = data.get('project_id')
-    message = data.get('message')
-    agent_type = 'Project Assistant'  # Hardcoded for now
-
-    # Get the AI agent configuration
-    agent_config = AIAgentConfig.query.filter_by(agent_type=agent_type).first()
-    if not agent_config:
-        return jsonify({"error": "Agent configuration not found"}), 404
-
-    # Get the AI provider
-    provider = db.session.get(AIProvider, agent_config.provider_id)
-    if not provider:
-        return jsonify({"error": "AI provider not found"}), 404
-
-    # Decrypt the API key
     try:
-        fernet = Fernet(app.config['ENCRYPTION_KEY'])
-        api_key = fernet.decrypt(provider.api_key_encrypted).decode()
-    except (InvalidToken, TypeError, ValueError):
-        return jsonify({"error": "Unable to decrypt API key"}), 500
+        data = request.json
+        project_id = data.get('project_id')
+        message = data.get('message')
+        agent_type = 'Project Assistant'  # Hardcoded for now
 
-    # Prepare the chat message
-    chat_message = {
-        "model": agent_config.model_name,
-        "messages": [
-            {"role": "system", "content": agent_config.system_prompt},
-            {"role": "user", "content": message}
-        ]
-    }
+        # Get the AI agent configuration
+        agent_config = AIAgentConfig.query.filter_by(agent_type=agent_type).first()
+        if not agent_config:
+            return jsonify({"error": "Agent configuration not found"}), 404
 
-    # Send request to the AI provider
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {api_key}"
-    }
-    response = requests.post(provider.api_url, json=chat_message, headers=headers)
+        # Get the AI provider
+        provider = db.session.get(AIProvider, agent_config.provider_id)
+        if not provider:
+            return jsonify({"error": "AI provider not found"}), 404
 
-    if response.status_code == 200:
+        # Decrypt the API key
+        try:
+            fernet = Fernet(app.config['ENCRYPTION_KEY'])
+            api_key = fernet.decrypt(provider.api_key_encrypted).decode()
+        except (InvalidToken, TypeError, ValueError) as e:
+            app.logger.error(f"Error decrypting API key: {str(e)}")
+            return jsonify({"error": "Unable to decrypt API key"}), 500
+
+        # Prepare the chat message
+        chat_message = {
+            "model": agent_config.model_name,
+            "messages": [
+                {"role": "system", "content": agent_config.system_prompt},
+                {"role": "user", "content": message}
+            ]
+        }
+
+        # Send request to the AI provider
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}"
+        }
+        response = requests.post(provider.api_url, json=chat_message, headers=headers, timeout=30)
+
+        response.raise_for_status()  # Raise an exception for non-200 status codes
+
         ai_response = response.json()['choices'][0]['message']['content']
         
         # Save the conversation
@@ -346,8 +349,13 @@ def chat():
         db.session.commit()
 
         return jsonify({"response": ai_response})
-    else:
-        return jsonify({"error": "Failed to get response from AI provider"}), response.status_code
+
+    except requests.RequestException as e:
+        app.logger.error(f"Error communicating with AI provider: {str(e)}")
+        return jsonify({"error": "Failed to get response from AI provider"}), 500
+    except Exception as e:
+        app.logger.error(f"Unexpected error in chat function: {str(e)}")
+        return jsonify({"error": "An unexpected error occurred"}), 500
 
 if __name__ == '__main__':
     init_db()
