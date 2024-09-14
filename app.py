@@ -144,8 +144,13 @@ def ai_providers():
             provider.name = data['name']
             provider.api_url = data['api_url']
         else:
-            provider = AIProvider(name=data['name'], api_url=data['api_url'])
-            db.session.add(provider)
+            existing_provider = AIProvider.query.filter_by(name=data['name']).first()
+            if existing_provider:
+                existing_provider.api_url = data['api_url']
+                provider = existing_provider
+            else:
+                provider = AIProvider(name=data['name'], api_url=data['api_url'])
+                db.session.add(provider)
         
         if 'api_key' in data and data['api_key']:
             fernet = Fernet(app.config['ENCRYPTION_KEY'])
