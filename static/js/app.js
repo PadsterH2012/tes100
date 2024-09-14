@@ -215,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('provider-id').value = provider.id || '';
                 document.getElementById('provider-name').value = provider.name || '';
                 document.getElementById('api-url').value = provider.api_url || '';
-                document.getElementById('api-key').value = provider.api_key || '';
+                // Remove the line that sets the API key value
             })
             .catch(error => {
                 console.error('Error fetching provider data:', error);
