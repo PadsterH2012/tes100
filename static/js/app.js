@@ -245,8 +245,10 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(() => {
             loadAgentConfigs();
-            document.getElementById('ai-agent-form').reset();
-            document.getElementById('config-id').value = '';
+            if (!configId) {
+                document.getElementById('ai-agent-form').reset();
+                document.getElementById('config-id').value = '';
+            }
         })
         .catch(error => {
             console.error('Error:', error);
