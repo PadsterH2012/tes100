@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function displayMessage(message) {
         const messageElement = document.createElement('div');
-        messageElement.classList.add(message.agent_type);
+        messageElement.classList.add('message', message.agent_type);
         messageElement.textContent = message.content;
         chatMessages.appendChild(messageElement);
         chatMessages.scrollTop = chatMessages.scrollHeight;
