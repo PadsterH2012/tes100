@@ -45,41 +45,61 @@
         </main>
         <section id="settings" style="display: none;">
             <h2>Settings</h2>
-            <div id="ai-provider-settings">
-                <h3>AI Provider Settings</h3>
-                <p>Default providers (Ollama, OpenAI, Anthropic) are pre-configured. You can add or edit providers below:</p>
-                <form id="ai-provider-form">
-                    <input type="hidden" id="provider-id">
-                    <label for="provider-name">Provider Name:</label>
-                    <input type="text" id="provider-name" required>
-                    <label for="api-url">API URL:</label>
-                    <input type="url" id="api-url" required>
-                    <label for="api-key">API Key:</label>
-                    <input type="password" id="api-key">
-                    <button type="submit">Save Provider</button>
-                    <button type="button" id="clear-provider-form">Clear Form</button>
-                </form>
-                <h4>Existing Providers</h4>
-                <ul id="provider-list"></ul>
-            </div>
-            <div id="ai-agent-settings">
-                <h3>AI Agent Settings</h3>
-                <form id="ai-agent-form">
-                    <input type="hidden" id="config-id">
-                    <label for="agent-type">Agent Type:</label>
-                    <select id="agent-type" required></select>
-                    <label for="provider-select">Provider:</label>
-                    <select id="provider-select" required></select>
-                    <label for="model-name">Model Name:</label>
-                    <input type="text" id="model-name" required>
-                    <label for="system-prompt">System Prompt:</label>
-                    <textarea id="system-prompt" rows="10" cols="50" required></textarea>
-                    <button type="submit">Save Agent Configuration</button>
-                    <button type="button" id="clear-form">Clear Form</button>
-                    <button type="button" id="apply-model-to-all">Apply Model to All Agents</button>
-                </form>
-                <h4>Existing Agent Configurations</h4>
-                <ul id="agent-config-list"></ul>
+            <div class="settings-container">
+                <div id="ai-provider-settings" class="settings-panel">
+                    <h3>AI Provider Settings</h3>
+                    <p>Default providers (Ollama, OpenAI, Anthropic) are pre-configured. You can add or edit providers below:</p>
+                    <form id="ai-provider-form" class="settings-form">
+                        <input type="hidden" id="provider-id">
+                        <div class="form-group">
+                            <label for="provider-name">Provider Name:</label>
+                            <input type="text" id="provider-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="api-url">API URL:</label>
+                            <input type="url" id="api-url" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="api-key">API Key:</label>
+                            <input type="password" id="api-key">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">Save Provider</button>
+                            <button type="button" id="clear-provider-form" class="btn-secondary">Clear Form</button>
+                        </div>
+                    </form>
+                    <h4>Existing Providers</h4>
+                    <ul id="provider-list" class="settings-list"></ul>
+                </div>
+                <div id="ai-agent-settings" class="settings-panel">
+                    <h3>AI Agent Settings</h3>
+                    <form id="ai-agent-form" class="settings-form">
+                        <input type="hidden" id="config-id">
+                        <div class="form-group">
+                            <label for="agent-type">Agent Type:</label>
+                            <select id="agent-type" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="provider-select">Provider:</label>
+                            <select id="provider-select" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="model-name">Model Name:</label>
+                            <input type="text" id="model-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="system-prompt">System Prompt:</label>
+                            <textarea id="system-prompt" rows="10" required></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">Save Agent Configuration</button>
+                            <button type="button" id="clear-form" class="btn-secondary">Clear Form</button>
+                            <button type="button" id="apply-model-to-all" class="btn-secondary">Apply Model to All Agents</button>
+                        </div>
+                    </form>
+                    <h4>Existing Agent Configurations</h4>
+                    <ul id="agent-config-list" class="settings-list"></ul>
+                </div>
             </div>
         </section>
     </div>
