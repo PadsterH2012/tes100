@@ -71,6 +71,5 @@ def get_documents(project_id):
         "content": doc.content
     } for doc in documents])
 
-if __name__ == '__main__':
-    init_db()
-    app.run(debug=True)
+# Initialize the database
+init_db()
