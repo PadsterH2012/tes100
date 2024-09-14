@@ -7,6 +7,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const sendMessageButton = document.getElementById('send-message');
     const documentDisplay = document.getElementById('document-display');
     const documentContent = document.getElementById('document-content');
+    const navProjects = document.getElementById('nav-projects');
+    const navSettings = document.getElementById('nav-settings');
+    const settingsSection = document.getElementById('settings');
+    const aiProviderForm = document.getElementById('ai-provider-form');
+    const providerList = document.getElementById('provider-list');
 
     function loadProjects() {
         fetch('/api/projects')
@@ -90,6 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     loadProjects();
+    loadProviders();
 
     let currentProjectId = null;
 
@@ -97,8 +103,58 @@ document.addEventListener('DOMContentLoaded', () => {
         currentProjectId = projectId;
         chatInterface.style.display = 'block';
         documentDisplay.style.display = 'block';
+        settingsSection.style.display = 'none';
         loadProjectDocuments(projectId);
         loadProjectConversations(projectId);
+    }
+
+    navProjects.addEventListener('click', (e) => {
+        e.preventDefault();
+        chatInterface.style.display = 'none';
+        documentDisplay.style.display = 'none';
+        settingsSection.style.display = 'none';
+        document.getElementById('project-list').style.display = 'block';
+    });
+
+    navSettings.addEventListener('click', (e) => {
+        e.preventDefault();
+        chatInterface.style.display = 'none';
+        documentDisplay.style.display = 'none';
+        document.getElementById('project-list').style.display = 'none';
+        settingsSection.style.display = 'block';
+    });
+
+    aiProviderForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const providerName = document.getElementById('provider-name').value;
+        const apiUrl = document.getElementById('api-url').value;
+        const apiKey = document.getElementById('api-key').value;
+
+        fetch('/api/ai_providers', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name: providerName, api_url: apiUrl, api_key: apiKey }),
+        })
+        .then(response => response.json())
+        .then(() => {
+            loadProviders();
+            aiProviderForm.reset();
+        });
+    });
+
+    function loadProviders() {
+        fetch('/api/ai_providers')
+            .then(response => response.json())
+            .then(providers => {
+                providerList.innerHTML = '';
+                providers.forEach(provider => {
+                    const li = document.createElement('li');
+                    li.textContent = `${provider.name} - ${provider.api_url}`;
+                    providerList.appendChild(li);
+                });
+            });
     }
 
     function loadProjectConversations(projectId) {

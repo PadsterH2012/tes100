@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from config import Config
 from models import db, Project, ProjectDocument, Conversation, AIProvider, AIAgentConfig
 import os
+from cryptography.fernet import Fernet
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -102,6 +103,24 @@ def get_conversations(project_id):
         "content": conv.content,
         "timestamp": conv.timestamp.isoformat()
     } for conv in conversations])
+
+@app.route('/api/ai_providers', methods=['GET', 'POST'])
+def ai_providers():
+    if request.method == 'POST':
+        data = request.json
+        fernet = Fernet(app.config['ENCRYPTION_KEY'])
+        encrypted_api_key = fernet.encrypt(data['api_key'].encode())
+        new_provider = AIProvider(
+            name=data['name'],
+            api_url=data['api_url'],
+            api_key_encrypted=encrypted_api_key
+        )
+        db.session.add(new_provider)
+        db.session.commit()
+        return jsonify({"id": new_provider.id, "name": new_provider.name, "api_url": new_provider.api_url}), 201
+    else:
+        providers = AIProvider.query.all()
+        return jsonify([{"id": p.id, "name": p.name, "api_url": p.api_url} for p in providers])
 
 if __name__ == '__main__':
     init_db()
