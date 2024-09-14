@@ -9,7 +9,7 @@ app = Flask(__name__)
 app.config.from_object(Config)
 db.init_app(app)
 
-AGENT_TYPES = ['Project Assistant', 'Writer', 'Architect', 'Developer', 'Tester']
+AGENT_TYPES = ['Project Assistant', 'Project Writer', 'Project Software Architect', 'Project UX SME', 'Project DB SME', 'Project Dev SME', 'Project Tester SME']
 
 def init_db():
     with app.app_context():
