@@ -171,7 +171,7 @@ def ai_provider(provider_id):
             try:
                 fernet = Fernet(app.config['ENCRYPTION_KEY'])
                 api_key = fernet.decrypt(provider.api_key_encrypted).decode()
-            except (cryptography.fernet.InvalidToken, TypeError, ValueError):
+            except (InvalidToken, TypeError, ValueError):
                 # If decryption fails, return an error message
                 return jsonify({"error": "Unable to decrypt API key. It may have been encrypted with a different key."}), 400
         return jsonify({"id": provider.id, "name": provider.name, "api_url": provider.api_url, "api_key": api_key})
