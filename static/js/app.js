@@ -166,6 +166,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
+    // Call loadProviders when the page loads
+    loadProviders();
+
     function loadAgentConfigs() {
         fetch('/api/ai_agent_configs')
             .then(response => response.json())

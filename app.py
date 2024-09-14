@@ -12,6 +12,21 @@ db.init_app(app)
 def init_db():
     with app.app_context():
         db.create_all()
+        
+        # Add default AI providers if they don't exist
+        default_providers = [
+            {"name": "Ollama", "api_url": "http://localhost:11434/api/chat"},
+            {"name": "OpenAI", "api_url": "https://api.openai.com/v1/chat/completions"},
+            {"name": "Anthropic", "api_url": "https://api.anthropic.com/v1/complete"}
+        ]
+        
+        for provider in default_providers:
+            existing_provider = AIProvider.query.filter_by(name=provider["name"]).first()
+            if not existing_provider:
+                new_provider = AIProvider(name=provider["name"], api_url=provider["api_url"])
+                db.session.add(new_provider)
+        
+        db.session.commit()
 
 @app.route('/')
 def index():
