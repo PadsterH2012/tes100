@@ -254,6 +254,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    function editAgentConfig(configId) {
+        fetch(`/api/ai_agent_configs/${configId}`)
+            .then(response => response.json())
+            .then(config => {
+                document.getElementById('config-id').value = config.id;
+                document.getElementById('agent-type').value = config.agent_type;
+                document.getElementById('provider-select').value = config.provider_id;
+                document.getElementById('model-name').value = config.model_name;
+                document.getElementById('system-prompt').value = config.system_prompt;
+            });
+    }
+
     // Call loadAgentTypes and loadAgentConfigs when the page loads
     loadAgentTypes();
     loadAgentConfigs();
