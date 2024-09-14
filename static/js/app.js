@@ -144,14 +144,28 @@ document.addEventListener('DOMContentLoaded', () => {
         documentDisplay.style.display = 'block';
         settingsSection.style.display = 'none';
         loadProjectDocuments(projectId);
-        loadProjectConversations(projectId);
-        
+        loadChatHistory(projectId);
+    
         // Fetch and set the project name
         fetch(`/api/projects/${projectId}`)
             .then(response => response.json())
             .then(project => {
                 document.getElementById('project-name').textContent = project.name;
                 document.getElementById('project-documents-title').textContent = `Project - ${project.name}`;
+            });
+    }
+
+    function loadChatHistory(projectId) {
+        fetch(`/api/projects/${projectId}/chat_history`)
+            .then(response => response.json())
+            .then(history => {
+                chatMessages.innerHTML = '';
+                history.forEach(message => {
+                    displayMessage(message);
+                });
+            })
+            .catch(error => {
+                console.error('Error loading chat history:', error);
             });
     }
 
@@ -497,18 +511,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // Call loadAgentTypes when the page loads
     loadAgentTypes();
 
-    function loadProjectConversations(projectId) {
-        fetch(`/api/projects/${projectId}/conversations`)
-            .then(response => response.json())
-            .then(conversations => {
-                chatMessages.innerHTML = '';
-                conversations.forEach(conversation => {
-                    displayMessage({
-                        agent_type: conversation.agent_type,
-                        content: conversation.content
-                    });
-                });
-            });
-    }
 
 });
