@@ -481,25 +481,55 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
-    const newDocumentForm = document.getElementById('new-document-form');
-    newDocumentForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const docType = document.getElementById('doc-type').value;
-        const docContent = document.getElementById('doc-content').value;
-
-        if (currentProjectId && docType && docContent) {
-            fetch(`/api/projects/${currentProjectId}/documents`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ doc_type: docType, content: docContent }),
-            })
-            .then(response => response.json())
-            .then(() => {
-                loadProjectDocuments(currentProjectId);
-                document.getElementById('doc-content').value = '';
-            });
-        }
+    const addDocumentButton = document.getElementById('add-document');
+    addDocumentButton.addEventListener('click', () => {
+        showAddDocumentModal();
     });
+
+    function showAddDocumentModal() {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3>Add Document</h3>
+                <form id="add-document-form">
+                    <input type="text" id="doc-type" placeholder="Document Type" required>
+                    <textarea id="doc-content" placeholder="Enter document content" required></textarea>
+                    <div class="modal-actions">
+                        <button type="submit">Add</button>
+                        <button type="button" id="cancel-add-document">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        const addDocumentForm = document.getElementById('add-document-form');
+        const cancelButton = document.getElementById('cancel-add-document');
+
+        addDocumentForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const docType = document.getElementById('doc-type').value;
+            const docContent = document.getElementById('doc-content').value;
+
+            if (currentProjectId && docType && docContent) {
+                fetch(`/api/projects/${currentProjectId}/documents`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ doc_type: docType, content: docContent }),
+                })
+                .then(response => response.json())
+                .then(() => {
+                    loadProjectDocuments(currentProjectId);
+                    document.body.removeChild(modal);
+                });
+            }
+        });
+
+        cancelButton.addEventListener('click', () => {
+            document.body.removeChild(modal);
+        });
+    }
 });
