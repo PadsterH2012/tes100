@@ -147,20 +147,25 @@ def ai_providers():
                 return jsonify({"error": "Provider not found"}), 404
             provider.name = data['name']
             provider.api_url = data['api_url']
+            if 'api_key' in data and data['api_key']:
+                fernet = Fernet(app.config['ENCRYPTION_KEY'])
+                provider.api_key_encrypted = fernet.encrypt(data['api_key'].encode())
+            db.session.commit()
         else:
             existing_provider = AIProvider.query.filter_by(name=data['name']).first()
             if existing_provider:
                 existing_provider.api_url = data['api_url']
+                if 'api_key' in data and data['api_key']:
+                    fernet = Fernet(app.config['ENCRYPTION_KEY'])
+                    existing_provider.api_key_encrypted = fernet.encrypt(data['api_key'].encode())
                 provider = existing_provider
             else:
                 provider = AIProvider(name=data['name'], api_url=data['api_url'])
+                if 'api_key' in data and data['api_key']:
+                    fernet = Fernet(app.config['ENCRYPTION_KEY'])
+                    provider.api_key_encrypted = fernet.encrypt(data['api_key'].encode())
                 db.session.add(provider)
-        
-        if 'api_key' in data and data['api_key']:
-            fernet = Fernet(app.config['ENCRYPTION_KEY'])
-            provider.api_key_encrypted = fernet.encrypt(data['api_key'].encode())
-        
-        db.session.commit()
+            db.session.commit()
         return jsonify({"id": provider.id, "name": provider.name, "api_url": provider.api_url}), 200
     else:
         providers = AIProvider.query.all()
