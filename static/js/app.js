@@ -12,6 +12,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingsSection = document.getElementById('settings');
     const aiProviderForm = document.getElementById('ai-provider-form');
     const providerList = document.getElementById('provider-list');
+    const aiAgentForm = document.getElementById('ai-agent-form');
+    const agentConfigList = document.getElementById('agent-config-list');
+    const providerSelect = document.getElementById('provider-select');
 
     function loadProjects() {
         fetch('/api/projects')
@@ -149,13 +152,58 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(response => response.json())
             .then(providers => {
                 providerList.innerHTML = '';
+                providerSelect.innerHTML = '';
                 providers.forEach(provider => {
                     const li = document.createElement('li');
                     li.textContent = `${provider.name} - ${provider.api_url}`;
                     providerList.appendChild(li);
+
+                    const option = document.createElement('option');
+                    option.value = provider.id;
+                    option.textContent = provider.name;
+                    providerSelect.appendChild(option);
                 });
             });
     }
+
+    function loadAgentConfigs() {
+        fetch('/api/ai_agent_configs')
+            .then(response => response.json())
+            .then(configs => {
+                agentConfigList.innerHTML = '';
+                configs.forEach(config => {
+                    const li = document.createElement('li');
+                    li.textContent = `${config.agent_type} - ${config.model_name}`;
+                    agentConfigList.appendChild(li);
+                });
+            });
+    }
+
+    aiAgentForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const agentType = document.getElementById('agent-type').value;
+        const providerId = providerSelect.value;
+        const modelName = document.getElementById('model-name').value;
+        const systemPrompt = document.getElementById('system-prompt').value;
+
+        fetch('/api/ai_agent_configs', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                agent_type: agentType,
+                provider_id: providerId,
+                model_name: modelName,
+                system_prompt: systemPrompt
+            }),
+        })
+        .then(response => response.json())
+        .then(() => {
+            loadAgentConfigs();
+            aiAgentForm.reset();
+        });
+    });
 
     function loadProjectConversations(projectId) {
         fetch(`/api/projects/${projectId}/conversations`)

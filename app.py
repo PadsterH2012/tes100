@@ -122,6 +122,35 @@ def ai_providers():
         providers = AIProvider.query.all()
         return jsonify([{"id": p.id, "name": p.name, "api_url": p.api_url} for p in providers])
 
+@app.route('/api/ai_agent_configs', methods=['GET', 'POST'])
+def ai_agent_configs():
+    if request.method == 'POST':
+        data = request.json
+        new_config = AIAgentConfig(
+            agent_type=data['agent_type'],
+            provider_id=data['provider_id'],
+            model_name=data['model_name'],
+            system_prompt=data['system_prompt']
+        )
+        db.session.add(new_config)
+        db.session.commit()
+        return jsonify({
+            "id": new_config.id,
+            "agent_type": new_config.agent_type,
+            "provider_id": new_config.provider_id,
+            "model_name": new_config.model_name,
+            "system_prompt": new_config.system_prompt
+        }), 201
+    else:
+        configs = AIAgentConfig.query.all()
+        return jsonify([{
+            "id": c.id,
+            "agent_type": c.agent_type,
+            "provider_id": c.provider_id,
+            "model_name": c.model_name,
+            "system_prompt": c.system_prompt
+        } for c in configs])
+
 if __name__ == '__main__':
     init_db()
     app.run(debug=False, host='127.0.0.1', port=int(os.environ.get('PORT', 8000)))
