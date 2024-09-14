@@ -32,7 +32,8 @@ def init_db():
         default_providers = [
             {"name": "Ollama", "api_url": "http://localhost:11434/api/chat"},
             {"name": "OpenAI", "api_url": "https://api.openai.com/v1/chat/completions"},
-            {"name": "Anthropic", "api_url": "https://api.anthropic.com/v1/complete"}
+            {"name": "Anthropic", "api_url": "https://api.anthropic.com/v1/complete"},
+            {"name": "OpenRouter", "api_url": "https://openrouter.ai/api/v1/chat/completions"}
         ]
         
         for provider in default_providers:
