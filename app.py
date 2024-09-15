@@ -191,6 +191,15 @@ def get_chat_history(project_id):
     app.logger.debug(f"Returning chat history: {chat_history}")
     return jsonify(chat_history)
 
+@app.route('/api/projects/<int:project_id>/clear_chat_history', methods=['POST'])
+def clear_chat_history(project_id):
+    app.logger.debug(f"Clearing chat history for project_id: {project_id}")
+    project = Project.query.get_or_404(project_id)
+    Conversation.query.filter_by(project_id=project.id).delete()
+    db.session.commit()
+    app.logger.debug(f"Chat history cleared for project_id: {project_id}")
+    return jsonify({"message": "Chat history cleared successfully"}), 200
+
 @app.route('/api/ai_providers', methods=['GET', 'POST'])
 def ai_providers():
     if request.method == 'POST':

@@ -96,6 +96,18 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
+    function clearProjectChatHistory(projectId) {
+        fetch(`/api/projects/${projectId}/clear_chat_history`, {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data.message);
+            clearChatMessages();
+        })
+        .catch(error => console.error('Error clearing chat history:', error));
+    }
+
     function loadProjectDocuments(projectId) {
         fetch(`/api/projects/${projectId}/documents`)
             .then(response => response.json())
@@ -148,7 +160,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ name: projectName, description: projectDescription }),
             })
             .then(response => response.json())
-            .then(() => loadProjects());
+            .then(project => {
+                loadProjects();
+                clearProjectChatHistory(project.id);
+            });
         }
     });
 
