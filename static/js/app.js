@@ -109,19 +109,66 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function loadProjectDocuments(projectId) {
-        fetch(`/api/projects/${projectId}/documents`)
-            .then(response => response.json())
-            .then(documents => {
-                documentContent.innerHTML = '';
-                // We're not displaying the document content anymore
-            });
-        
         // Load and display the project journal
         fetch(`/api/projects/${projectId}/journal`)
             .then(response => response.json())
             .then(data => {
                 const journalTab = document.getElementById('tab1');
                 journalTab.innerHTML = `<h3>Project Journal</h3><pre>${data.content}</pre>`;
+            });
+
+        // Load and display the project scope
+        fetch(`/api/projects/${projectId}/scope`)
+            .then(response => response.json())
+            .then(data => {
+                const scopeTab = document.getElementById('tab2');
+                scopeTab.innerHTML = `<h3>Project Scope</h3><pre>${data.content}</pre>`;
+            });
+
+        // Load and display the project HLD
+        fetch(`/api/projects/${projectId}/hld`)
+            .then(response => response.json())
+            .then(data => {
+                const hldTab = document.getElementById('tab3');
+                hldTab.innerHTML = `<h3>High-Level Design (HLD)</h3><pre>${data.content}</pre>`;
+            });
+
+        // Load and display the project LLDs
+        fetch(`/api/projects/${projectId}/lld`)
+            .then(response => response.json())
+            .then(data => {
+                const lldTab = document.getElementById('tab4');
+                lldTab.innerHTML = `<h3>Low-Level Designs (LLDs)</h3>`;
+                data.forEach(lld => {
+                    lldTab.innerHTML += `<h4>${lld.component_name}</h4><pre>${lld.content}</pre>`;
+                });
+            });
+
+        // Load and display the project Master LLD
+        fetch(`/api/projects/${projectId}/master-lld`)
+            .then(response => response.json())
+            .then(data => {
+                const masterLldTab = document.getElementById('tab5');
+                masterLldTab.innerHTML = `<h3>Master LLD</h3><pre>${data.content}</pre>`;
+            });
+
+        // Load and display the coding plan
+        fetch(`/api/projects/${projectId}/coding-plan`)
+            .then(response => response.json())
+            .then(data => {
+                const codingPlanTab = document.getElementById('tab6');
+                codingPlanTab.innerHTML = `<h3>Coding Plan</h3><pre>${data.content}</pre>`;
+            });
+
+        // Load and display the unit tests
+        fetch(`/api/projects/${projectId}/unit-tests`)
+            .then(response => response.json())
+            .then(data => {
+                const unitTestsTab = document.getElementById('tab7');
+                unitTestsTab.innerHTML = `<h3>Unit Tests</h3>`;
+                data.forEach(test => {
+                    unitTestsTab.innerHTML += `<h4>${test.component_name}</h4><pre>${test.content}</pre>`;
+                });
             });
     }
 
