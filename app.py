@@ -177,10 +177,10 @@ def ai_providers():
                 )
                 db.session.add(provider)
             db.session.commit()
-        return jsonify({"id": provider.id, "name": provider.name, "api_url": provider.api_url}), 200
+        return jsonify({"id": provider.id, "name": provider.name, "api_url": provider.api_url, "has_api_key": bool(provider.api_key)}), 200
     else:
         providers = AIProvider.query.all()
-        return jsonify([{"id": p.id, "name": p.name, "api_url": p.api_url} for p in providers])
+        return jsonify([{"id": p.id, "name": p.name, "api_url": p.api_url, "has_api_key": bool(p.api_key)} for p in providers])
 
 @app.route('/api/ai_providers/<int:provider_id>', methods=['GET', 'PUT', 'DELETE'])
 def ai_provider(provider_id):
