@@ -323,7 +323,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayMessage(message) {
         console.log('Displaying message:', message);
         const messageElement = document.createElement('div');
-        messageElement.classList.add('message', message.agent_type.toLowerCase().replace(/\s+/g, '-'));
+        const agentClass = message.agent_type.toLowerCase() === 'user' ? 'user' : 'project-assistant';
+        messageElement.classList.add('message', agentClass);
         messageElement.textContent = message.content;
         chatMessages.appendChild(messageElement);
         console.log('Message added to chat window');
