@@ -720,8 +720,61 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Backup settings
+    document.getElementById('backup-settings').addEventListener('click', () => {
+        fetch('/api/backup')
+            .then(response => response.json())
+            .then(data => {
+                const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'ai_project_manager_backup.json';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to backup settings. Please try again.');
+            });
+    });
+
+    // Restore settings
+    document.getElementById('restore-settings').addEventListener('click', () => {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.json';
+        fileInput.onchange = (event) => {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const contents = e.target.result;
+                fetch('/api/restore', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: contents,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    loadProviders();
+                    loadAgentConfigs();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to restore settings. Please try again.');
+                });
+            };
+            reader.readAsText(file);
+        };
+        fileInput.click();
+    });
+
     // Call loadAgentTypes when the page loads
     loadAgentTypes();
-
 
 });

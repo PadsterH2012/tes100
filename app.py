@@ -346,6 +346,40 @@ def get_agent_system_prompt(agent_type):
     else:
         return jsonify({"error": "Agent type not found"}), 404
 
+@app.route('/api/backup', methods=['GET'])
+def backup_settings():
+    providers = AIProvider.query.all()
+    agent_configs = AIAgentConfig.query.all()
+    
+    backup_data = {
+        'providers': [{'name': p.name, 'api_url': p.api_url, 'api_key': p.api_key} for p in providers],
+        'agent_configs': [{'agent_type': c.agent_type, 'provider_id': c.provider_id, 'model_name': c.model_name, 'system_prompt': c.system_prompt} for c in agent_configs]
+    }
+    
+    return jsonify(backup_data)
+
+@app.route('/api/restore', methods=['POST'])
+def restore_settings():
+    data = request.json
+    
+    # Clear existing data
+    db.session.query(AIProvider).delete()
+    db.session.query(AIAgentConfig).delete()
+    
+    # Restore providers
+    for provider_data in data['providers']:
+        provider = AIProvider(name=provider_data['name'], api_url=provider_data['api_url'], api_key=provider_data['api_key'])
+        db.session.add(provider)
+    
+    # Restore agent configs
+    for config_data in data['agent_configs']:
+        config = AIAgentConfig(agent_type=config_data['agent_type'], provider_id=config_data['provider_id'], model_name=config_data['model_name'], system_prompt=config_data['system_prompt'])
+        db.session.add(config)
+    
+    db.session.commit()
+    
+    return jsonify({"message": "Settings restored successfully"})
+
 @app.route('/api/chat', methods=['POST'])
 def chat():
     try:
