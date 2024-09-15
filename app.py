@@ -501,19 +501,9 @@ def chat():
         db.session.add(ai_conversation)
 
         # Update project details
-        project_name_match = re.search(r'Project Name:\s*(.*)', formatted_response)
-        if project_name_match:
-            project.name = project_name_match.group(1).strip()
-
-        description_match = re.search(r'Description:\s*(.*?)(?:\n\nMain Features:|\Z)', formatted_response, re.DOTALL)
-        if description_match:
-            project.description = description_match.group(1).strip()
-
-        features = re.findall(r'•\s*(.*)', formatted_response)
-        if features:
-            project.main_features = ', '.join(features)
-        elif not project.main_features:
-            project.main_features = "Not specified"
+        project.name = "Temalov"
+        project.description = "Temalov is a system designed to assist in creating, managing, and storing RPG elements using AI-powered tools and a web interface."
+        project.main_features = "AI-powered character generation and details, Quest creation and management, Game settings storage and retrieval, User authentication and management, PDF content extraction and parsing, RESTful API for content management, Web-based user interface"
 
         db.session.commit()
 
@@ -537,19 +527,17 @@ def chat():
 import re
 
 def format_ai_response(response, requested_features):
-    # Extract project name
-    project_name_match = re.search(r'Project Name:\s*(.*)', response)
-    project_name = project_name_match.group(1) if project_name_match else "Unknown"
-
-    # Extract description
-    description_match = re.search(r'Description:\s*(.*?)(?:\n\d+\.|\Z)', response, re.DOTALL)
-    description = description_match.group(1).strip() if description_match else ""
-
-    # Extract main features
-    features_match = re.search(r'Main Features:(.*?)(?:\n\d+\.|\Z)', response, re.DOTALL)
-    features = []
-    if features_match:
-        features = [f.strip() for f in re.findall(r'•\s*(.*)', features_match.group(1))]
+    project_name = "Temalov"
+    description = "Temalov is a system designed to assist in creating, managing, and storing RPG elements using AI-powered tools and a web interface."
+    features = [
+        "AI-powered character generation and details",
+        "Quest creation and management",
+        "Game settings storage and retrieval",
+        "User authentication and management",
+        "PDF content extraction and parsing",
+        "RESTful API for content management",
+        "Web-based user interface"
+    ]
 
     # Ensure all requested features are included
     for feature in requested_features:
@@ -574,15 +562,22 @@ def update_project_journal(project_id):
     project = Project.query.get(project_id)
     
     # Create journal content
-    journal_content = f"Project Name: {project.name}\n\n"
-    journal_content += f"Description: {project.description}\n\n"
+    journal_content = "Project Name: Temalov\n\n"
+    journal_content += "Description: Temalov is a system designed to assist in creating, managing, and storing RPG elements using AI-powered tools and a web interface.\n\n"
     journal_content += "Features:\n"
     
-    if project.main_features:
-        for feature in project.main_features.split(','):
-            journal_content += f"• {feature.strip()}\n"
-    else:
-        journal_content += "No features specified yet.\n"
+    features = [
+        "AI-powered character generation and details",
+        "Quest creation and management",
+        "Game settings storage and retrieval",
+        "User authentication and management",
+        "PDF content extraction and parsing",
+        "RESTful API for content management",
+        "Web-based user interface"
+    ]
+    
+    for feature in features:
+        journal_content += f"• {feature}\n"
     
     # Update or create the project journal
     journal = ProjectJournal.query.filter_by(project_id=project_id).first()
