@@ -538,29 +538,14 @@ def chat():
 import re
 
 def format_ai_response(response, requested_features):
-    project_name = "Temalov"
-    description = "Temalov is a system designed to assist in creating, managing, and storing RPG elements using AI-powered tools and a web interface."
-    features = [
-        "AI-powered character generation and details",
-        "Quest creation and management",
-        "Game settings storage and retrieval",
-        "User authentication and management",
-        "PDF content extraction and parsing",
-        "RESTful API for content management",
-        "Web-based user interface",
-        "Multiplayer functionality"
-    ]
-
-    # Ensure all requested features are included
-    for feature in requested_features:
-        if feature not in features:
-            features.append(feature)
+    # Generate project details using AI
+    project_details = generate_project_details(requested_features)
 
     # Format the response
-    formatted_response = f"Project Name: {project_name}\n\n"
-    formatted_response += f"Description: {description}\n\n"
+    formatted_response = f"Project Name: {project_details['name']}\n\n"
+    formatted_response += f"Description: {project_details['description']}\n\n"
     formatted_response += "Main Features:\n"
-    for feature in features:
+    for feature in project_details['features']:
         formatted_response += f"• {feature}\n"
 
     # Add confirmation of requested features
@@ -569,6 +554,64 @@ def format_ai_response(response, requested_features):
         formatted_response += f"• The requested feature '{feature}' has been included.\n"
 
     return formatted_response
+
+def generate_project_details(requested_features):
+    # Prepare the prompt for AI
+    prompt = f"""Generate project details for a role-playing game (RPG) content creation and management system. Include the following:
+1. A creative project name
+2. A brief description of the system
+3. A list of main features, including these requested features: {', '.join(requested_features)}
+
+Format the response as a Python dictionary with keys 'name', 'description', and 'features'."""
+
+    # Use the existing AI chat functionality to generate the response
+    ai_response = get_ai_response(prompt)
+
+    # Parse the AI response and return the project details
+    try:
+        project_details = eval(ai_response)
+        return project_details
+    except:
+        # Fallback to default values if parsing fails
+        return {
+            "name": "Temalov",
+            "description": "A system designed to assist in creating, managing, and storing RPG elements using AI-powered tools and a web interface.",
+            "features": [
+                "AI-powered character generation and details",
+                "Quest creation and management",
+                "Game settings storage and retrieval",
+                "User authentication and management",
+                "PDF content extraction and parsing",
+                "RESTful API for content management",
+                "Web-based user interface",
+                "Multiplayer functionality"
+            ] + requested_features
+        }
+
+def get_ai_response(prompt):
+    # Use the existing AI provider and configuration
+    agent_config = AIAgentConfig.query.filter_by(agent_type='Project Assistant').first()
+    provider = db.session.get(AIProvider, agent_config.provider_id)
+
+    chat_message = {
+        "model": agent_config.model_name,
+        "messages": [
+            {"role": "system", "content": "You are a helpful AI assistant for generating project details."},
+            {"role": "user", "content": prompt}
+        ],
+        "temperature": agent_config.temperature
+    }
+
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {provider.api_key}"
+    }
+
+    response = requests.post(provider.api_url, json=chat_message, headers=headers, timeout=30)
+    response.raise_for_status()
+
+    response_json = response.json()
+    return response_json['choices'][0]['message']['content']
 
 def update_project_journal(project_id):
     project = Project.query.get(project_id)
