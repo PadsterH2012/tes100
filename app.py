@@ -51,24 +51,25 @@ def index():
 def projects():
     if request.method == 'POST':
         data = request.json
-        new_project = Project(name=data['name'])
+        new_project = Project(name=data['name'], description=data.get('description', ''))
         db.session.add(new_project)
         db.session.commit()
-        return jsonify({"id": new_project.id, "name": new_project.name}), 201
+        return jsonify({"id": new_project.id, "name": new_project.name, "description": new_project.description}), 201
     else:
         projects = Project.query.all()
-        return jsonify([{"id": p.id, "name": p.name} for p in projects])
+        return jsonify([{"id": p.id, "name": p.name, "description": p.description} for p in projects])
 
 @app.route('/api/projects/<int:project_id>', methods=['GET', 'PUT', 'DELETE'])
 def project(project_id):
     project = Project.query.get_or_404(project_id)
     if request.method == 'GET':
-        return jsonify({"id": project.id, "name": project.name})
+        return jsonify({"id": project.id, "name": project.name, "description": project.description})
     elif request.method == 'PUT':
         data = request.json
-        project.name = data['name']
+        project.name = data.get('name', project.name)
+        project.description = data.get('description', project.description)
         db.session.commit()
-        return jsonify({"id": project.id, "name": project.name})
+        return jsonify({"id": project.id, "name": project.name, "description": project.description})
     elif request.method == 'DELETE':
         db.session.delete(project)
         db.session.commit()

@@ -22,19 +22,60 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(projects => {
                 projectList.innerHTML = '';
                 projects.forEach(project => {
-                    const li = document.createElement('li');
-                    li.textContent = project.name;
-                    li.addEventListener('click', () => selectProject(project.id));
-                    projectList.appendChild(li);
+                    const projectBox = createProjectBox(project);
+                    projectList.appendChild(projectBox);
                 });
             });
     }
 
-    function selectProject(projectId) {
+    function createProjectBox(project) {
+        const box = document.createElement('div');
+        box.className = 'project-box';
+        box.innerHTML = `
+            <h3>${project.name}</h3>
+            <p>${project.description || 'No description available.'}</p>
+            <div class="button-group">
+                <button class="edit-project">Edit</button>
+                <button class="delete-project">Delete</button>
+                <button class="continue-project">Continue</button>
+            </div>
+        `;
+
+        box.querySelector('.edit-project').addEventListener('click', () => editProject(project.id));
+        box.querySelector('.delete-project').addEventListener('click', () => deleteProject(project.id));
+        box.querySelector('.continue-project').addEventListener('click', () => continueProject(project.id));
+
+        return box;
+    }
+
+    function editProject(projectId) {
+        // Implement edit functionality
+        console.log('Edit project', projectId);
+    }
+
+    function deleteProject(projectId) {
+        if (confirm('Are you sure you want to delete this project?')) {
+            fetch(`/api/projects/${projectId}`, { method: 'DELETE' })
+                .then(() => loadProjects());
+        }
+    }
+
+    function continueProject(projectId) {
+        currentProjectId = projectId;
+        document.getElementById('project-list').style.display = 'none';
         chatInterface.style.display = 'block';
         documentDisplay.style.display = 'block';
-        // Load project details, chat history, and documents
+        clearChatMessages();
         loadProjectDocuments(projectId);
+        loadChatHistory(projectId);
+
+        // Fetch and set the project name
+        fetch(`/api/projects/${projectId}`)
+            .then(response => response.json())
+            .then(project => {
+                document.getElementById('project-name').textContent = project.name;
+                document.getElementById('project-documents-title').textContent = `Project - ${project.name}`;
+            });
     }
 
     function loadProjectDocuments(projectId) {
