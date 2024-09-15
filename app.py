@@ -497,14 +497,17 @@ def chat():
         )
         db.session.add(ai_conversation)
 
-        # Update project details if necessary
-        if "Description:" in formatted_response:
-            project.description = formatted_response.split("Description:")[1].split("\n")[0].strip()
-        
-        # Extract main features from AI response
-        if "Main Features:" in formatted_response:
-            feature_section = formatted_response.split("Main Features:")[1].split("\n\n")[0]
-            features = [f.strip()[2:] for f in feature_section.split("\n") if f.strip().startswith("•")]
+        # Update project details
+        project_name_match = re.search(r'Project Name:\s*(.*)', formatted_response)
+        if project_name_match:
+            project.name = project_name_match.group(1).strip()
+
+        description_match = re.search(r'Description:\s*(.*?)(?:\n\nMain Features:|\Z)', formatted_response, re.DOTALL)
+        if description_match:
+            project.description = description_match.group(1).strip()
+
+        features = re.findall(r'•\s*(.*)', formatted_response)
+        if features:
             project.main_features = ', '.join(features)
         elif not project.main_features:
             project.main_features = "Not specified"
@@ -512,6 +515,7 @@ def chat():
         db.session.commit()
 
         app.logger.info("Conversation and project details saved to database")
+        app.logger.info(f"Updated project name: {project.name}")
         app.logger.info(f"Updated project description: {project.description}")
         app.logger.info(f"Updated project features: {project.main_features}")
 
@@ -527,34 +531,30 @@ def chat():
         app.logger.error(f"Unexpected error in chat function: {str(e)}", exc_info=True)
         return jsonify({"error": "An unexpected error occurred"}), 500
 
+import re
+
 def format_ai_response(response):
-    # Split the response into paragraphs
-    paragraphs = response.split('\n')
-    
-    # Format each paragraph
-    formatted_paragraphs = []
-    current_paragraph = []
-    
-    for line in paragraphs:
-        stripped_line = line.strip()
-        if stripped_line:
-            if stripped_line.startswith('-'):
-                # Add bullet points to lists
-                current_paragraph.append(f"• {stripped_line[1:].strip()}")
-            else:
-                current_paragraph.append(stripped_line)
-        elif current_paragraph:
-            # Empty line indicates a new paragraph
-            formatted_paragraphs.append(' '.join(current_paragraph))
-            current_paragraph = []
-    
-    # Add the last paragraph if it exists
-    if current_paragraph:
-        formatted_paragraphs.append(' '.join(current_paragraph))
-    
-    # Join the formatted paragraphs with double line breaks
-    formatted_response = '\n\n'.join(formatted_paragraphs)
-    
+    # Extract project name
+    project_name_match = re.search(r'Project Name:\s*(.*)', response)
+    project_name = project_name_match.group(1) if project_name_match else "Unknown"
+
+    # Extract description
+    description_match = re.search(r'Description:\s*(.*?)(?:\n\d+\.|\Z)', response, re.DOTALL)
+    description = description_match.group(1).strip() if description_match else ""
+
+    # Extract main features
+    features_match = re.search(r'Main Features:(.*?)(?:\n\d+\.|\Z)', response, re.DOTALL)
+    features = []
+    if features_match:
+        features = [f.strip() for f in re.findall(r'•\s*(.*)', features_match.group(1))]
+
+    # Format the response
+    formatted_response = f"Project Name: {project_name}\n\n"
+    formatted_response += f"Description: {description}\n\n"
+    formatted_response += "Main Features:\n"
+    for feature in features:
+        formatted_response += f"• {feature}\n"
+
     return formatted_response
 
 def update_project_journal(project_id):
