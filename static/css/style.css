@@ -208,10 +208,17 @@ section {
     background-color: #fff;
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
+    word-wrap: break-word;
+    white-space: pre-wrap;
 }
 
 .tab-content.active {
     display: block;
+}
+
+.tab-content pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 
 
