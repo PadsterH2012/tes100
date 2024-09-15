@@ -113,12 +113,13 @@ document.addEventListener('DOMContentLoaded', () => {
     newProjectButton.addEventListener('click', () => {
         const projectName = prompt('Enter project name:');
         if (projectName) {
+            const projectDescription = prompt('Enter project description (optional):');
             fetch('/api/projects', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ name: projectName }),
+                body: JSON.stringify({ name: projectName, description: projectDescription }),
             })
             .then(response => response.json())
             .then(() => loadProjects());
