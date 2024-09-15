@@ -150,6 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearChatMessages();
         loadProjectDocuments(projectId);
         loadChatHistory(projectId);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
 
         // Fetch and set the project name
         fetch(`/api/projects/${projectId}`)
@@ -235,6 +236,9 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(history => {
                 console.log('Received chat history:', history);
                 chatMessages.innerHTML = '';
+                history.forEach(message => {
+                    displayMessage(message);
+                });
                 history.forEach(message => {
                     displayMessage(message);
                 });
