@@ -8,6 +8,13 @@ class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
+    project_type = db.Column(db.String(50))  # homelab or production
+    programming_language = db.Column(db.String(100))
+    main_features = db.Column(db.Text)
+    target_audience = db.Column(db.String(100))
+    technologies = db.Column(db.String(200))
+    timeline = db.Column(db.String(100))
+    challenges = db.Column(db.Text)
     creation_date = db.Column(db.DateTime, default=datetime.utcnow)
     last_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

@@ -12,7 +12,19 @@ db.init_app(app)
 AGENT_TYPES = ['Project Assistant', 'Project Writer', 'Project Software Architect', 'Project UX SME', 'Project DB SME', 'Project Dev SME', 'Project Tester SME', 'Project Web Researcher']
 
 PREDEFINED_SYSTEM_PROMPTS = {
-    'Project Assistant': "You are a Project Assistant AI. Your role is to help manage project tasks, timelines, and resources. Provide guidance on project management best practices and help keep the project on track.",
+    'Project Assistant': """You are a Project Assistant AI. Your role is to help manage project tasks, timelines, and resources. Provide guidance on project management best practices and help keep the project on track.
+
+When starting a new project, always ask the following questions if they haven't been answered yet:
+1. Is this a homelab or production project?
+2. What programming language(s) do you intend to use for this project?
+3. What is the detailed description of the project?
+4. What are the main features or functionalities you want to implement in this project?
+5. What is the target audience or users for this project?
+6. Are there any specific technologies or frameworks you want to use?
+7. What is the expected timeline for this project?
+8. Are there any specific challenges or constraints you foresee?
+
+After gathering this information, summarize the project details and provide initial recommendations or next steps.""",
     'Project Writer': "You are a Project Writer AI. Your role is to assist in creating project documentation, reports, and other written materials. Help improve clarity, consistency, and quality of project-related writing.",
     'Project Software Architect': "You are a Project Software Architect AI. Your role is to design and plan software systems, considering scalability, maintainability, and performance. Provide guidance on architectural decisions and best practices.",
     'Project UX SME': "You are a Project UX SME (Subject Matter Expert) AI. Your role is to provide expertise on user experience design, usability, and interface design. Offer insights to improve the overall user experience of the project.",
@@ -347,11 +359,18 @@ def chat():
             app.logger.error(f"API key for {provider.name} not found in the database")
             return jsonify({"error": f"API key for {provider.name} not configured"}), 500
 
+        # Get the project details
+        project = Project.query.get(project_id)
+        if not project:
+            app.logger.error(f"Project with ID {project_id} not found")
+            return jsonify({"error": "Project not found"}), 404
+
         # Prepare the chat message
         chat_message = {
             "model": agent_config.model_name,
             "messages": [
                 {"role": "system", "content": agent_config.system_prompt},
+                {"role": "system", "content": f"Current project: {project.name}\nDescription: {project.description}"},
                 {"role": "user", "content": message}
             ]
         }
@@ -390,9 +409,18 @@ def chat():
             content=ai_response
         )
         db.session.add(ai_conversation)
+
+        # Update project details if necessary
+        if "project_type" not in project.description:
+            project.description += f"\nProject Type: {ai_response.get('project_type', 'Not specified')}"
+        if "programming_language" not in project.description:
+            project.description += f"\nProgramming Language: {ai_response.get('programming_language', 'Not specified')}"
+        if "main_features" not in project.description:
+            project.description += f"\nMain Features: {ai_response.get('main_features', 'Not specified')}"
+
         db.session.commit()
 
-        app.logger.info("Conversation saved to database")
+        app.logger.info("Conversation and project details saved to database")
 
         return jsonify({"response": ai_response})
 
