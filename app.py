@@ -412,11 +412,11 @@ def chat():
 
         # Update project details if necessary
         if "project_type" not in project.description:
-            project.description += f"\nProject Type: {ai_response.get('project_type', 'Not specified')}"
+            project.description += f"\nProject Type: Not specified"
         if "programming_language" not in project.description:
-            project.description += f"\nProgramming Language: {ai_response.get('programming_language', 'Not specified')}"
+            project.description += f"\nProgramming Language: Not specified"
         if "main_features" not in project.description:
-            project.description += f"\nMain Features: {ai_response.get('main_features', 'Not specified')}"
+            project.description += f"\nMain Features: Not specified"
 
         db.session.commit()
 
