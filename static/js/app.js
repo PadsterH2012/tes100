@@ -561,6 +561,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('provider-select').value = config.provider_id;
                 document.getElementById('model-name').value = config.model_name;
                 document.getElementById('system-prompt').value = config.system_prompt;
+                document.getElementById('temperature').value = config.temperature;
             });
     }
 
@@ -691,6 +692,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const providerId = providerSelect.value;
         const modelName = document.getElementById('model-name').value;
         const systemPrompt = document.getElementById('system-prompt').value;
+        const temperature = parseFloat(document.getElementById('temperature').value);
 
         fetch('/api/ai_agent_configs', {
             method: 'POST',
@@ -701,7 +703,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 agent_type: agentType,
                 provider_id: providerId,
                 model_name: modelName,
-                system_prompt: systemPrompt
+                system_prompt: systemPrompt,
+                temperature: temperature
             }),
         })
         .then(response => {

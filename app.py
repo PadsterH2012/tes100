@@ -254,6 +254,7 @@ def ai_agent_configs():
             existing_config.provider_id = data['provider_id']
             existing_config.model_name = data['model_name']
             existing_config.system_prompt = data['system_prompt']
+            existing_config.temperature = data.get('temperature', 0.95)
             db.session.commit()
             config = existing_config
         else:
@@ -261,7 +262,8 @@ def ai_agent_configs():
                 agent_type=data['agent_type'],
                 provider_id=data['provider_id'],
                 model_name=data['model_name'],
-                system_prompt=data.get('system_prompt') or PREDEFINED_SYSTEM_PROMPTS.get(data['agent_type'], "")
+                system_prompt=data.get('system_prompt') or PREDEFINED_SYSTEM_PROMPTS.get(data['agent_type'], ""),
+                temperature=data.get('temperature', 0.95)
             )
             db.session.add(new_config)
             db.session.commit()
@@ -272,7 +274,8 @@ def ai_agent_configs():
             "agent_type": config.agent_type,
             "provider_id": config.provider_id,
             "model_name": config.model_name,
-            "system_prompt": config.system_prompt
+            "system_prompt": config.system_prompt,
+            "temperature": config.temperature
         }), 200
     else:
         configs = AIAgentConfig.query.all()
@@ -281,7 +284,8 @@ def ai_agent_configs():
             "agent_type": c.agent_type,
             "provider_id": c.provider_id,
             "model_name": c.model_name,
-            "system_prompt": c.system_prompt
+            "system_prompt": c.system_prompt,
+            "temperature": c.temperature
         } for c in configs])
 
 @app.route('/api/ai_agent_configs/<int:config_id>', methods=['GET', 'PUT', 'DELETE'])
@@ -293,7 +297,8 @@ def ai_agent_config(config_id):
             "agent_type": config.agent_type,
             "provider_id": config.provider_id,
             "model_name": config.model_name,
-            "system_prompt": config.system_prompt
+            "system_prompt": config.system_prompt,
+            "temperature": config.temperature
         })
     elif request.method == 'PUT':
         data = request.json
@@ -303,13 +308,15 @@ def ai_agent_config(config_id):
         config.provider_id = data.get('provider_id', config.provider_id)
         config.model_name = data.get('model_name', config.model_name)
         config.system_prompt = data.get('system_prompt', config.system_prompt)
+        config.temperature = data.get('temperature', config.temperature)
         db.session.commit()
         return jsonify({
             "id": config.id,
             "agent_type": config.agent_type,
             "provider_id": config.provider_id,
             "model_name": config.model_name,
-            "system_prompt": config.system_prompt
+            "system_prompt": config.system_prompt,
+            "temperature": config.temperature
         }), 200  # Explicitly return 200 status code
     elif request.method == 'DELETE':
         db.session.delete(config)
@@ -403,7 +410,7 @@ def chat():
             app.logger.error("Agent configuration not found")
             return jsonify({"error": "Agent configuration not found"}), 404
 
-        app.logger.info(f"Agent configuration found. Provider ID: {agent_config.provider_id}, Model: {agent_config.model_name}")
+        app.logger.info(f"Agent configuration found. Provider ID: {agent_config.provider_id}, Model: {agent_config.model_name}, Temperature: {agent_config.temperature}")
 
         # Get the AI provider
         provider = db.session.get(AIProvider, agent_config.provider_id)
@@ -432,7 +439,8 @@ def chat():
                 {"role": "system", "content": agent_config.system_prompt},
                 {"role": "system", "content": f"Current project: {project.name}\nDescription: {project.description}"},
                 {"role": "user", "content": message}
-            ]
+            ],
+            "temperature": agent_config.temperature
         }
 
         app.logger.info(f"Prepared chat message: {chat_message}")

@@ -44,3 +44,4 @@ class AIAgentConfig(db.Model):
     provider_id = db.Column(db.Integer, db.ForeignKey('ai_provider.id'), nullable=False)
     model_name = db.Column(db.String(50), nullable=False)
     system_prompt = db.Column(db.Text)
+    temperature = db.Column(db.Float, default=0.95)
