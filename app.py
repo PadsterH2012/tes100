@@ -498,17 +498,13 @@ def chat():
         db.session.add(ai_conversation)
 
         # Update project details if necessary
-        if project.description is None:
-            project.description = ""
+        if "Description:" in formatted_response:
+            project.description = formatted_response.split("Description:")[1].split("\n")[0].strip()
         
         # Extract main features from AI response
-        features = []
-        for line in ai_response.split('\n'):
-            if line.lower().startswith('main features:'):
-                features = [f.strip() for f in line.split(':')[1].split(',')]
-                break
-        
-        if features:
+        if "Main Features:" in formatted_response:
+            feature_section = formatted_response.split("Main Features:")[1].split("\n\n")[0]
+            features = [f.strip()[2:] for f in feature_section.split("\n") if f.strip().startswith("•")]
             project.main_features = ', '.join(features)
         elif not project.main_features:
             project.main_features = "Not specified"
@@ -563,28 +559,7 @@ def format_ai_response(response):
 
 def update_project_journal(project_id):
     project = Project.query.get(project_id)
-    conversations = Conversation.query.filter_by(project_id=project_id).order_by(Conversation.timestamp).all()
     
-    # Extract description and features from conversations
-    description = ""
-    features = []
-    for conv in conversations:
-        if conv.agent_type == 'Project Assistant':
-            # Look for description
-            if "Description:" in conv.content:
-                description = conv.content.split("Description:")[1].split("\n")[0].strip()
-            # Look for features
-            if "Features:" in conv.content:
-                feature_section = conv.content.split("Features:")[1].split("\n\n")[0]
-                features = [f.strip()[2:] for f in feature_section.split("\n") if f.strip().startswith("•")]
-
-    # Update project details
-    if description:
-        project.description = description
-    if features:
-        project.main_features = ", ".join(features)
-    db.session.commit()
-
     # Create journal content
     journal_content = f"Project Name: {project.name}\n\n"
     journal_content += f"Description: {project.description}\n\n"
