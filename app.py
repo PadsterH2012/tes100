@@ -423,6 +423,9 @@ def chat():
         db.session.add(ai_conversation)
 
         # Update project details if necessary
+        if project.description is None:
+            project.description = ""
+        
         if "project_type" not in project.description:
             project.description += f"\nProject Type: Not specified"
         if "programming_language" not in project.description:
@@ -433,6 +436,7 @@ def chat():
         db.session.commit()
 
         app.logger.info("Conversation and project details saved to database")
+        app.logger.info(f"Updated project description: {project.description}")
 
         return jsonify({"response": ai_response})
 
@@ -440,7 +444,7 @@ def chat():
         app.logger.error(f"Error communicating with AI provider: {str(e)}")
         return jsonify({"error": "Failed to get response from AI provider"}), 500
     except Exception as e:
-        app.logger.error(f"Unexpected error in chat function: {str(e)}")
+        app.logger.error(f"Unexpected error in chat function: {str(e)}", exc_info=True)
         return jsonify({"error": "An unexpected error occurred"}), 500
 
 if __name__ == '__main__':
