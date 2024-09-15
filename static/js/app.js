@@ -99,18 +99,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 body: JSON.stringify({ project_id: currentProjectId, message: message }),
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.error) {
                     console.error('Error:', data.error);
-                    displayMessage({ agent_type: 'Project Assistant', content: 'Sorry, an error occurred.' });
+                    displayMessage({ agent_type: 'Project Assistant', content: `Error: ${data.error}` });
                 } else {
                     displayMessage({ agent_type: 'Project Assistant', content: data.response });
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                displayMessage({ agent_type: 'Project Assistant', content: 'Sorry, an error occurred.' });
+                displayMessage({ agent_type: 'Project Assistant', content: `An error occurred: ${error.message}` });
             });
         }
     }

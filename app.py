@@ -322,15 +322,23 @@ def chat():
         message = data.get('message')
         agent_type = 'Project Assistant'  # Hardcoded for now
 
+        app.logger.info(f"Chat request received. Project ID: {project_id}, Message: {message}")
+
         # Get the AI agent configuration
         agent_config = AIAgentConfig.query.filter_by(agent_type=agent_type).first()
         if not agent_config:
+            app.logger.error("Agent configuration not found")
             return jsonify({"error": "Agent configuration not found"}), 404
+
+        app.logger.info(f"Agent configuration found. Provider ID: {agent_config.provider_id}, Model: {agent_config.model_name}")
 
         # Get the AI provider
         provider = db.session.get(AIProvider, agent_config.provider_id)
         if not provider:
+            app.logger.error("AI provider not found")
             return jsonify({"error": "AI provider not found"}), 404
+
+        app.logger.info(f"AI provider found. Name: {provider.name}, API URL: {provider.api_url}")
 
         # Get the API key from the database
         api_key = provider.api_key
@@ -347,16 +355,24 @@ def chat():
             ]
         }
 
+        app.logger.info(f"Prepared chat message: {chat_message}")
+
         # Send request to the AI provider
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {api_key}"
         }
+        app.logger.info(f"Sending request to AI provider: {provider.api_url}")
         response = requests.post(provider.api_url, json=chat_message, headers=headers, timeout=30)
 
+        app.logger.info(f"Response status code: {response.status_code}")
         response.raise_for_status()  # Raise an exception for non-200 status codes
 
-        ai_response = response.json()['choices'][0]['message']['content']
+        response_json = response.json()
+        app.logger.info(f"Response JSON: {response_json}")
+
+        ai_response = response_json['choices'][0]['message']['content']
+        app.logger.info(f"AI response: {ai_response}")
         
         # Save the user message
         user_conversation = Conversation(
@@ -374,6 +390,8 @@ def chat():
         )
         db.session.add(ai_conversation)
         db.session.commit()
+
+        app.logger.info("Conversation saved to database")
 
         return jsonify({"response": ai_response})
 
