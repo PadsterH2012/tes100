@@ -252,6 +252,17 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
+    function displayMessage(message) {
+        console.log('Displaying message:', message);
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message', message.agent_type.toLowerCase().replace(/\s+/g, '-'));
+        messageElement.textContent = message.content;
+        chatMessages.appendChild(messageElement);
+        console.log('Message added to chat window');
+        console.log('Current chat messages:', chatMessages.innerHTML);
+        console.log('Number of messages in chat window:', chatMessages.children.length);
+    }
+
     // Add this function to debug the chat history
     function debugChatHistory(projectId) {
         fetch(`/api/projects/${projectId}/chat_history`)
