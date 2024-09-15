@@ -103,6 +103,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 documentContent.innerHTML = '';
                 // We're not displaying the document content anymore
             });
+        
+        // Load and display the project journal
+        fetch(`/api/projects/${projectId}/journal`)
+            .then(response => response.json())
+            .then(data => {
+                const journalTab = document.getElementById('tab1');
+                journalTab.innerHTML = `<h3>Project Journal</h3><pre>${data.content}</pre>`;
+            });
     }
 
     // Tab functionality

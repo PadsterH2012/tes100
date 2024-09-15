@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
-from models import db, Project, ProjectDocument, Conversation, AIProvider, AIAgentConfig
+from models import db, Project, ProjectDocument, Conversation, AIProvider, AIAgentConfig, ProjectJournal
 import os
 import requests
+from sqlalchemy import desc
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -508,6 +509,9 @@ def chat():
         app.logger.info("Conversation and project details saved to database")
         app.logger.info(f"Updated project description: {project.description}")
 
+        # Update the project journal
+        update_project_journal(project_id)
+
         return jsonify({"response": ai_response})
 
     except requests.RequestException as e:
@@ -546,6 +550,42 @@ def format_ai_response(response):
     formatted_response = '\n\n'.join(formatted_paragraphs)
     
     return formatted_response
+
+def update_project_journal(project_id):
+    project = Project.query.get(project_id)
+    conversations = Conversation.query.filter_by(project_id=project_id).order_by(Conversation.timestamp).all()
+    
+    journal_content = f"Project Name: {project.name}\n"
+    journal_content += f"Description: {project.description}\n\n"
+    journal_content += "Project Details:\n"
+    
+    for conv in conversations:
+        if conv.agent_type == 'Project Assistant':
+            # Extract project details from the AI's responses
+            lines = conv.content.split('\n')
+            for line in lines:
+                if ':' in line:
+                    key, value = line.split(':', 1)
+                    journal_content += f"{key.strip()}: {value.strip()}\n"
+    
+    # Update or create the project journal
+    journal = ProjectJournal.query.filter_by(project_id=project_id).first()
+    if journal:
+        journal.content = journal_content
+        journal.last_updated = datetime.utcnow()
+    else:
+        journal = ProjectJournal(project_id=project_id, content=journal_content)
+        db.session.add(journal)
+    
+    db.session.commit()
+
+@app.route('/api/projects/<int:project_id>/journal', methods=['GET'])
+def get_project_journal(project_id):
+    journal = ProjectJournal.query.filter_by(project_id=project_id).first()
+    if journal:
+        return jsonify({"content": journal.content})
+    else:
+        return jsonify({"content": "No journal entries yet."})
 
 if __name__ == '__main__':
     init_db()
