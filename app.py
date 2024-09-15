@@ -404,7 +404,10 @@ def chat():
             app.logger.error("Empty AI response")
             return jsonify({"error": "Empty response from AI provider"}), 500
 
-        app.logger.info(f"AI response: {ai_response}")
+        # Format the AI response for better readability
+        formatted_response = self.format_ai_response(ai_response)
+
+        app.logger.info(f"Formatted AI response: {formatted_response}")
         
         # Save the user message
         user_conversation = Conversation(
@@ -414,11 +417,11 @@ def chat():
         )
         db.session.add(user_conversation)
 
-        # Save the AI response
+        # Save the formatted AI response
         ai_conversation = Conversation(
             project_id=project_id,
             agent_type=agent_type,
-            content=ai_response
+            content=formatted_response
         )
         db.session.add(ai_conversation)
 
@@ -446,6 +449,28 @@ def chat():
     except Exception as e:
         app.logger.error(f"Unexpected error in chat function: {str(e)}", exc_info=True)
         return jsonify({"error": "An unexpected error occurred"}), 500
+
+def format_ai_response(self, response):
+    # Split the response into paragraphs
+    paragraphs = response.split('\n\n')
+    
+    # Format each paragraph
+    formatted_paragraphs = []
+    for paragraph in paragraphs:
+        # Add bullet points to lists
+        if '\n- ' in paragraph:
+            lines = paragraph.split('\n')
+            formatted_lines = [f"• {line[2:]}" if line.startswith('- ') else line for line in lines]
+            formatted_paragraph = '\n'.join(formatted_lines)
+        else:
+            formatted_paragraph = paragraph
+        
+        formatted_paragraphs.append(formatted_paragraph)
+    
+    # Join the formatted paragraphs with double line breaks
+    formatted_response = '\n\n'.join(formatted_paragraphs)
+    
+    return formatted_response
 
 if __name__ == '__main__':
     init_db()
