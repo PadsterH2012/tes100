@@ -560,20 +560,40 @@ def format_ai_response(response):
 
 def update_project_journal(project_id):
     project = Project.query.get(project_id)
+    conversations = Conversation.query.filter_by(project_id=project_id).order_by(Conversation.timestamp).all()
     
+    # Extract description and features from conversations
+    description = ""
+    features = []
+    for conv in conversations:
+        if conv.agent_type == 'Project Assistant':
+            # Look for description
+            if "Description:" in conv.content:
+                description = conv.content.split("Description:")[1].split("\n")[0].strip()
+            # Look for features
+            if "Features:" in conv.content:
+                feature_section = conv.content.split("Features:")[1].split("\n\n")[0]
+                features = [f.strip()[2:] for f in feature_section.split("\n") if f.strip().startswith("•")]
+
+    # Update project details
+    if description:
+        project.description = description
+    if features:
+        project.main_features = ", ".join(features)
+    db.session.commit()
+
+    # Create journal content
     journal_content = f"Project Name: {project.name}\n\n"
     journal_content += f"Description: {project.description}\n\n"
     journal_content += "Features:\n"
     
     if project.main_features:
-        features = project.main_features.split(',')
-        for feature in features:
+        for feature in project.main_features.split(','):
             journal_content += f"• {feature.strip()}\n"
     else:
         journal_content += "No features specified yet.\n"
     
     journal_content += "\nConversation History:\n"
-    conversations = Conversation.query.filter_by(project_id=project_id).order_by(Conversation.timestamp).all()
     for conv in conversations:
         journal_content += f"\n[{conv.agent_type}] {conv.timestamp.strftime('%Y-%m-%d %H:%M:%S')}:\n{conv.content}\n"
     
