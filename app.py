@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
 from datetime import datetime
-from models import db, Project, ProjectDocument, Conversation, AIProvider, AIAgentConfig, ProjectJournal
+from models import db, Project, ProjectDocument, Conversation, AIProvider, AIAgentConfig, ProjectJournal, ProjectScope, ProjectHLD, ProjectLLD, ProjectMasterLLD, CodingPlan, UnitTest
 import os
 import requests
 from sqlalchemy import desc
