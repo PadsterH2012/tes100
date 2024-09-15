@@ -514,7 +514,7 @@ def chat():
         # Update project details
         project.name = "Temalov"
         project.description = "Temalov is a system designed to assist in creating, managing, and storing RPG elements using AI-powered tools and a web interface."
-        project.main_features = "AI-powered character generation and details, Quest creation and management, Game settings storage and retrieval, User authentication and management, PDF content extraction and parsing, RESTful API for content management, Web-based user interface"
+        project.main_features = "AI-powered character generation and details, Quest creation and management, Game settings storage and retrieval, User authentication and management, PDF content extraction and parsing, RESTful API for content management, Web-based user interface, Multiplayer functionality"
 
         db.session.commit()
 
@@ -547,7 +547,8 @@ def format_ai_response(response, requested_features):
         "User authentication and management",
         "PDF content extraction and parsing",
         "RESTful API for content management",
-        "Web-based user interface"
+        "Web-based user interface",
+        "Multiplayer functionality"
     ]
 
     # Ensure all requested features are included
@@ -584,7 +585,8 @@ def update_project_journal(project_id):
         "User authentication and management",
         "PDF content extraction and parsing",
         "RESTful API for content management",
-        "Web-based user interface"
+        "Web-based user interface",
+        "Multiplayer functionality"
     ]
     
     for feature in features:
