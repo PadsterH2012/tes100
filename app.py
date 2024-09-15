@@ -461,20 +461,28 @@ def chat():
 
 def format_ai_response(response):
     # Split the response into paragraphs
-    paragraphs = response.split('\n\n')
+    paragraphs = response.split('\n')
     
     # Format each paragraph
     formatted_paragraphs = []
-    for paragraph in paragraphs:
-        # Add bullet points to lists
-        if '\n- ' in paragraph:
-            lines = paragraph.split('\n')
-            formatted_lines = [f"• {line[2:]}" if line.startswith('- ') else line for line in lines]
-            formatted_paragraph = '\n'.join(formatted_lines)
-        else:
-            formatted_paragraph = paragraph
-        
-        formatted_paragraphs.append(formatted_paragraph)
+    current_paragraph = []
+    
+    for line in paragraphs:
+        stripped_line = line.strip()
+        if stripped_line:
+            if stripped_line.startswith('-'):
+                # Add bullet points to lists
+                current_paragraph.append(f"• {stripped_line[1:].strip()}")
+            else:
+                current_paragraph.append(stripped_line)
+        elif current_paragraph:
+            # Empty line indicates a new paragraph
+            formatted_paragraphs.append(' '.join(current_paragraph))
+            current_paragraph = []
+    
+    # Add the last paragraph if it exists
+    if current_paragraph:
+        formatted_paragraphs.append(' '.join(current_paragraph))
     
     # Join the formatted paragraphs with double line breaks
     formatted_response = '\n\n'.join(formatted_paragraphs)
