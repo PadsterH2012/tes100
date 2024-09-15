@@ -290,19 +290,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 providerSelect.innerHTML = '';
                 providers.forEach(provider => {
                     const li = document.createElement('li');
-                    li.textContent = `${provider.name} - ${provider.api_url}`;
-                
+                    li.textContent = `${provider.name} - ${provider.api_url} - API Key: ${provider.has_api_key ? '######' : 'Not set'}`;
+            
                     const buttonContainer = document.createElement('div');
                     buttonContainer.className = 'button-container';
 
                     const editButton = document.createElement('button');
                     editButton.textContent = 'Edit';
                     editButton.addEventListener('click', () => editProvider(provider.id));
-                
+            
                     const deleteButton = document.createElement('button');
                     deleteButton.textContent = 'Delete';
                     deleteButton.addEventListener('click', () => deleteProvider(provider.id));
-                
+            
                     buttonContainer.appendChild(editButton);
                     buttonContainer.appendChild(deleteButton);
                     li.appendChild(buttonContainer);
