@@ -201,6 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearChatMessages();
         loadProjectDocuments(projectId);
         loadChatHistory(projectId);
+        debugChatHistory(projectId); // Add this line to debug
 
         // Fetch and set the project name
         fetch(`/api/projects/${projectId}`)
@@ -245,6 +246,18 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .catch(error => {
                 console.error('Error loading chat history:', error);
+            });
+    }
+
+    // Add this function to debug the chat history
+    function debugChatHistory(projectId) {
+        fetch(`/api/projects/${projectId}/chat_history`)
+            .then(response => response.json())
+            .then(history => {
+                console.log('Full chat history:', JSON.stringify(history, null, 2));
+            })
+            .catch(error => {
+                console.error('Error fetching chat history for debugging:', error);
             });
     }
 
