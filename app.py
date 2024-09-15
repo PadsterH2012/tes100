@@ -143,7 +143,7 @@ def get_chat_history(project_id):
     chat_history = [{
         "agent_type": conv.agent_type,
         "content": conv.content
-    } for conv in conversations]
+    } for conv in conversations if conv.agent_type in ['user', 'Project Assistant']]
     app.logger.debug(f"Returning chat history: {chat_history}")
     return jsonify(chat_history)
 
