@@ -130,10 +130,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function displayMessage(message) {
+        console.log('Displaying message:', message);
         const messageElement = document.createElement('div');
         messageElement.classList.add('message', message.agent_type.toLowerCase());
         messageElement.textContent = message.content;
         chatMessages.appendChild(messageElement);
+        console.log('Message added to chat window');
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
@@ -236,9 +238,6 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(history => {
                 console.log('Received chat history:', history);
                 chatMessages.innerHTML = '';
-                history.forEach(message => {
-                    displayMessage(message);
-                });
                 history.forEach(message => {
                     displayMessage(message);
                 });
