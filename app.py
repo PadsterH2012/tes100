@@ -110,6 +110,9 @@ def project(project_id):
         # Delete related documents
         ProjectDocument.query.filter_by(project_id=project_id).delete()
         
+        # Delete related journal
+        ProjectJournal.query.filter_by(project_id=project_id).delete()
+        
         # Delete the project itself
         db.session.delete(project)
         db.session.commit()
