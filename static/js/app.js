@@ -49,8 +49,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function editProject(projectId) {
-        // Implement edit functionality
-        console.log('Edit project', projectId);
+        fetch(`/api/projects/${projectId}`)
+            .then(response => response.json())
+            .then(project => {
+                const newName = prompt('Enter new project name:', project.name);
+                const newDescription = prompt('Enter new project description:', project.description);
+                
+                if (newName !== null && newDescription !== null) {
+                    fetch(`/api/projects/${projectId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ name: newName, description: newDescription }),
+                    })
+                    .then(response => response.json())
+                    .then(() => loadProjects())
+                    .catch(error => console.error('Error updating project:', error));
+                }
+            })
+            .catch(error => console.error('Error fetching project details:', error));
     }
 
     function deleteProject(projectId) {
