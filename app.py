@@ -389,10 +389,21 @@ def chat():
         app.logger.info(f"Response status code: {response.status_code}")
         response.raise_for_status()  # Raise an exception for non-200 status codes
 
+        response_text = response.text
+        app.logger.info(f"Raw response text: {response_text}")
+
         response_json = response.json()
         app.logger.info(f"Response JSON: {response_json}")
 
+        if 'choices' not in response_json or not response_json['choices']:
+            app.logger.error("No choices in response JSON")
+            return jsonify({"error": "Invalid response from AI provider"}), 500
+
         ai_response = response_json['choices'][0]['message']['content']
+        if not ai_response:
+            app.logger.error("Empty AI response")
+            return jsonify({"error": "Empty response from AI provider"}), 500
+
         app.logger.info(f"AI response: {ai_response}")
         
         # Save the user message
