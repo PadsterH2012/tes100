@@ -137,6 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
         chatMessages.appendChild(messageElement);
         console.log('Message added to chat window');
         console.log('Current chat messages:', chatMessages.innerHTML);
+        console.log('Number of messages in chat window:', chatMessages.children.length);
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
@@ -240,9 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(history => {
                 console.log('Received chat history:', history);
                 // Clear the chat messages container before adding new messages
-                while (chatMessages.firstChild) {
-                    chatMessages.removeChild(chatMessages.firstChild);
-                }
+                chatMessages.innerHTML = '';
                 history.forEach(message => {
                     displayMessage(message);
                 });
