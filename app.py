@@ -88,7 +88,7 @@ def projects():
         return jsonify({"id": new_project.id, "name": new_project.name, "description": new_project.description}), 201
     else:
         projects = Project.query.all()
-        return jsonify([{"id": p.id, "name": p.name, "description": p.description} for p in projects])
+        return jsonify([{"id": p.id, "name": p.name, "description": p.description or ''} for p in projects])
 
 @app.route('/api/projects/<int:project_id>', methods=['GET', 'PUT', 'DELETE'])
 def project(project_id):
