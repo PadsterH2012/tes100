@@ -332,7 +332,12 @@ document.addEventListener('DOMContentLoaded', () => {
         messageElement.appendChild(headerElement);
 
         const contentElement = document.createElement('div');
-        contentElement.textContent = message.content;
+        contentElement.classList.add('message-content');
+    
+        // Format the content
+        const formattedContent = formatMessageContent(message.content);
+        contentElement.innerHTML = formattedContent;
+    
         messageElement.appendChild(contentElement);
 
         const timestampElement = document.createElement('div');
@@ -345,6 +350,23 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Current chat messages:', chatMessages.innerHTML);
         console.log('Number of messages in chat window:', chatMessages.children.length);
         scrollChatToBottom();
+    }
+
+    function formatMessageContent(content) {
+        // Convert line breaks to <br> tags
+        content = content.replace(/\n/g, '<br>');
+    
+        // Convert bullet points (lines starting with '-' or '*') to HTML list items
+        content = content.replace(/(?:^|\n)[-*]\s*(.+)/g, (match, p1) => `<li>${p1}</li>`);
+        content = content.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+    
+        // Wrap paragraphs (separated by double line breaks) in <p> tags
+        content = content.replace(/(.+?)(\n\n|$)/g, '<p>$1</p>');
+    
+        // Remove empty paragraphs
+        content = content.replace(/<p><\/p>/g, '');
+    
+        return content;
     }
 
     // Add this function to debug the chat history

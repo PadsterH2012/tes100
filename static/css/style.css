@@ -113,6 +113,24 @@ section {
     font-weight: bold;
 }
 
+.message-content {
+    font-size: 1em;
+    line-height: 1.4;
+}
+
+.message-content p {
+    margin-bottom: 10px;
+}
+
+.message-content ul {
+    padding-left: 20px;
+    margin-bottom: 10px;
+}
+
+.message-content li {
+    margin-bottom: 5px;
+}
+
 .message-timestamp {
     font-size: 0.7em;
     text-align: right;
