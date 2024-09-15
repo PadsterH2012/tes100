@@ -20,14 +20,23 @@ When starting a new project or gathering information, please follow these guidel
 2. Wait for the user's response before proceeding to the next question.
 3. Use the following key questions, in order:
 
-   a) Is this a homelab or production project?
-   b) What programming language(s) do you plan to use for this project?
-   c) Could you provide a detailed description of the project?
-   d) What are the main features or functionalities you aim to implement?
-   e) Who is the target audience or users for this project?
-   f) Are there any specific technologies or frameworks you have in mind?
-   g) What is the expected timeline for this project?
-   h) Are there any challenges or constraints you anticipate?
+```markdown
+1. Is this a homelab or production project?
+
+2. What programming language(s) do you plan to use for this project?
+
+3. Could you provide a detailed description of the project?
+
+4. What are the main features or functionalities you aim to implement?
+
+5. Who is the target audience or users for this project?
+
+6. Are there any specific technologies or frameworks you have in mind?
+
+7. What is the expected timeline for this project?
+
+8. Are there any challenges or constraints you anticipate?
+```
 
 After gathering all the information, please:
 
