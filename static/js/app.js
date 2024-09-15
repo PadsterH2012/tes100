@@ -112,12 +112,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     displayMessage({ agent_type: 'Project Assistant', content: data.response });
                 }
+                // Scroll to bottom after displaying the message
+                scrollChatToBottom();
             })
             .catch(error => {
                 console.error('Error:', error);
                 displayMessage({ agent_type: 'Project Assistant', content: `An error occurred: ${error.message}` });
+                // Scroll to bottom even if there's an error
+                scrollChatToBottom();
             });
         }
+    }
+
+    function scrollChatToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
     sendMessageButton.addEventListener('click', sendMessage);
@@ -261,6 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Message added to chat window');
         console.log('Current chat messages:', chatMessages.innerHTML);
         console.log('Number of messages in chat window:', chatMessages.children.length);
+        scrollChatToBottom();
     }
 
     // Add this function to debug the chat history
