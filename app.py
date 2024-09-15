@@ -519,7 +519,7 @@ def chat():
         # Update the project journal
         update_project_journal(project_id)
 
-        return jsonify({"response": ai_response})
+        return jsonify({"response": formatted_response})
 
     except requests.RequestException as e:
         app.logger.error(f"Error communicating with AI provider: {str(e)}")
@@ -571,6 +571,11 @@ def update_project_journal(project_id):
             journal_content += f"• {feature.strip()}\n"
     else:
         journal_content += "No features specified yet.\n"
+    
+    journal_content += "\nConversation History:\n"
+    conversations = Conversation.query.filter_by(project_id=project_id).order_by(Conversation.timestamp).all()
+    for conv in conversations:
+        journal_content += f"\n[{conv.agent_type}] {conv.timestamp.strftime('%Y-%m-%d %H:%M:%S')}:\n{conv.content}\n"
     
     # Update or create the project journal
     journal = ProjectJournal.query.filter_by(project_id=project_id).first()
