@@ -325,7 +325,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const messageElement = document.createElement('div');
         const agentClass = message.agent_type.toLowerCase() === 'user' ? 'user' : 'project-assistant';
         messageElement.classList.add('message', agentClass);
-        messageElement.textContent = message.content;
+
+        const headerElement = document.createElement('div');
+        headerElement.classList.add('message-header');
+        headerElement.textContent = message.agent_type;
+        messageElement.appendChild(headerElement);
+
+        const contentElement = document.createElement('div');
+        contentElement.textContent = message.content;
+        messageElement.appendChild(contentElement);
+
+        const timestampElement = document.createElement('div');
+        timestampElement.classList.add('message-timestamp');
+        timestampElement.textContent = new Date().toLocaleTimeString();
+        messageElement.appendChild(timestampElement);
+
         chatMessages.appendChild(messageElement);
         console.log('Message added to chat window');
         console.log('Current chat messages:', chatMessages.innerHTML);
