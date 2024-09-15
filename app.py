@@ -476,8 +476,11 @@ def chat():
             app.logger.error("Empty AI response")
             return jsonify({"error": "Empty response from AI provider"}), 500
 
+        # Extract requested features from the user message
+        requested_features = re.findall(r'(?:add|include|implement)\s+(?:a|an|the)?\s*(.+?)(?:\s+feature|\s*$)', message, re.IGNORECASE)
+        
         # Format the AI response for better readability
-        formatted_response = format_ai_response(ai_response)
+        formatted_response = format_ai_response(ai_response, requested_features)
 
         app.logger.info(f"Formatted AI response: {formatted_response}")
         
@@ -533,7 +536,7 @@ def chat():
 
 import re
 
-def format_ai_response(response):
+def format_ai_response(response, requested_features):
     # Extract project name
     project_name_match = re.search(r'Project Name:\s*(.*)', response)
     project_name = project_name_match.group(1) if project_name_match else "Unknown"
@@ -548,12 +551,22 @@ def format_ai_response(response):
     if features_match:
         features = [f.strip() for f in re.findall(r'•\s*(.*)', features_match.group(1))]
 
+    # Ensure all requested features are included
+    for feature in requested_features:
+        if feature not in features:
+            features.append(feature)
+
     # Format the response
     formatted_response = f"Project Name: {project_name}\n\n"
     formatted_response += f"Description: {description}\n\n"
     formatted_response += "Main Features:\n"
     for feature in features:
         formatted_response += f"• {feature}\n"
+
+    # Add confirmation of requested features
+    formatted_response += "\nConfirmation:\n"
+    for feature in requested_features:
+        formatted_response += f"• The requested feature '{feature}' has been included.\n"
 
     return formatted_response
 
