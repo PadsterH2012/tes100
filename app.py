@@ -596,10 +596,6 @@ def update_project_journal(project_id):
     else:
         journal_content += "No features specified yet.\n"
     
-    journal_content += "\nConversation History:\n"
-    for conv in conversations:
-        journal_content += f"\n[{conv.agent_type}] {conv.timestamp.strftime('%Y-%m-%d %H:%M:%S')}:\n{conv.content}\n"
-    
     # Update or create the project journal
     journal = ProjectJournal.query.filter_by(project_id=project_id).first()
     if journal:
