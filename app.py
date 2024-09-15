@@ -498,17 +498,23 @@ def chat():
         if project.description is None:
             project.description = ""
         
-        if "project_type" not in project.description:
-            project.description += f"\nProject Type: Not specified"
-        if "programming_language" not in project.description:
-            project.description += f"\nProgramming Language: Not specified"
-        if "main_features" not in project.description:
-            project.description += f"\nMain Features: Not specified"
+        # Extract main features from AI response
+        features = []
+        for line in ai_response.split('\n'):
+            if line.lower().startswith('main features:'):
+                features = [f.strip() for f in line.split(':')[1].split(',')]
+                break
+        
+        if features:
+            project.main_features = ', '.join(features)
+        elif not project.main_features:
+            project.main_features = "Not specified"
 
         db.session.commit()
 
         app.logger.info("Conversation and project details saved to database")
         app.logger.info(f"Updated project description: {project.description}")
+        app.logger.info(f"Updated project features: {project.main_features}")
 
         # Update the project journal
         update_project_journal(project_id)
@@ -554,20 +560,17 @@ def format_ai_response(response):
 
 def update_project_journal(project_id):
     project = Project.query.get(project_id)
-    conversations = Conversation.query.filter_by(project_id=project_id).order_by(Conversation.timestamp).all()
     
-    journal_content = f"Project Name: {project.name}\n"
+    journal_content = f"Project Name: {project.name}\n\n"
     journal_content += f"Description: {project.description}\n\n"
-    journal_content += "Project Details:\n"
+    journal_content += "Features:\n"
     
-    for conv in conversations:
-        if conv.agent_type == 'Project Assistant':
-            # Extract project details from the AI's responses
-            lines = conv.content.split('\n')
-            for line in lines:
-                if ':' in line:
-                    key, value = line.split(':', 1)
-                    journal_content += f"{key.strip()}: {value.strip()}\n"
+    if project.main_features:
+        features = project.main_features.split(',')
+        for feature in features:
+            journal_content += f"• {feature.strip()}\n"
+    else:
+        journal_content += "No features specified yet.\n"
     
     # Update or create the project journal
     journal = ProjectJournal.query.filter_by(project_id=project_id).first()
