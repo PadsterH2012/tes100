@@ -405,7 +405,7 @@ def chat():
             return jsonify({"error": "Empty response from AI provider"}), 500
 
         # Format the AI response for better readability
-        formatted_response = self.format_ai_response(ai_response)
+        formatted_response = format_ai_response(ai_response)
 
         app.logger.info(f"Formatted AI response: {formatted_response}")
         
@@ -450,7 +450,7 @@ def chat():
         app.logger.error(f"Unexpected error in chat function: {str(e)}", exc_info=True)
         return jsonify({"error": "An unexpected error occurred"}), 500
 
-def format_ai_response(self, response):
+def format_ai_response(response):
     # Split the response into paragraphs
     paragraphs = response.split('\n\n')
     
