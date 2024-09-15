@@ -102,6 +102,13 @@ def project(project_id):
         db.session.commit()
         return jsonify({"id": project.id, "name": project.name, "description": project.description})
     elif request.method == 'DELETE':
+        # Delete related conversations
+        Conversation.query.filter_by(project_id=project_id).delete()
+        
+        # Delete related documents
+        ProjectDocument.query.filter_by(project_id=project_id).delete()
+        
+        # Delete the project itself
         db.session.delete(project)
         db.session.commit()
         return '', 204
