@@ -504,7 +504,7 @@ def chat():
         requested_features = re.findall(r'(?:add|include|implement)\s+(?:a|an|the)?\s*(.+?)(?:\s+feature|\s*$)', message, re.IGNORECASE)
         
         # Format the AI response for better readability
-        formatted_response = format_ai_response(ai_response, requested_features)
+        formatted_response = format_ai_response(ai_response, requested_features, project)
 
         app.logger.info(f"Formatted AI response: {formatted_response}")
         
@@ -516,25 +516,18 @@ def chat():
         )
         db.session.add(user_conversation)
 
-        # Save the formatted AI response
+        # Save the AI response
         ai_conversation = Conversation(
             project_id=project_id,
             agent_type=agent_type,
-            content=formatted_response
+            content=ai_response
         )
         db.session.add(ai_conversation)
 
-        # Update project details
-        project.name = "Temalov"
-        project.description = "Temalov is a system designed to assist in creating, managing, and storing RPG elements using AI-powered tools and a web interface."
-        project.main_features = "AI-powered character generation and details, Quest creation and management, Game settings storage and retrieval, User authentication and management, PDF content extraction and parsing, RESTful API for content management, Web-based user interface, Multiplayer functionality"
-
+        # Save the conversation without updating project details
         db.session.commit()
 
-        app.logger.info("Conversation and project details saved to database")
-        app.logger.info(f"Updated project name: {project.name}")
-        app.logger.info(f"Updated project description: {project.description}")
-        app.logger.info(f"Updated project features: {project.main_features}")
+        app.logger.info("Conversation saved to database")
 
         # Update the project journal
         update_project_journal(project_id)
@@ -550,21 +543,22 @@ def chat():
 
 import re
 
-def format_ai_response(response, requested_features):
-    # Generate project details using AI
-    project_details = generate_project_details(requested_features)
-
+def format_ai_response(response, requested_features, project):
     # Format the response
-    formatted_response = f"Project Name: {project_details['name']}\n\n"
-    formatted_response += f"Description: {project_details['description']}\n\n"
+    formatted_response = f"Project Name: {project.name}\n\n"
+    formatted_response += f"Description: {project.description}\n\n"
     formatted_response += "Main Features:\n"
-    for feature in project_details['features']:
+    for feature in project.main_features.split(', '):
         formatted_response += f"• {feature}\n"
 
+    # Add the AI's response
+    formatted_response += f"\nAI Response:\n{response}\n"
+
     # Add confirmation of requested features
-    formatted_response += "\nConfirmation:\n"
-    for feature in requested_features:
-        formatted_response += f"• The requested feature '{feature}' has been included.\n"
+    if requested_features:
+        formatted_response += "\nRequested Features:\n"
+        for feature in requested_features:
+            formatted_response += f"• {feature}\n"
 
     return formatted_response
 
