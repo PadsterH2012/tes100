@@ -449,11 +449,17 @@ def chat():
             return jsonify({"error": "Project not found"}), 404
 
         # Prepare the chat message
+        project_info = f"Current project: {project.name}\n"
+        if project.description:
+            project_info += f"Description: {project.description}\n"
+        if project.main_features:
+            project_info += f"Main features: {project.main_features}"
+
         chat_message = {
             "model": agent_config.model_name,
             "messages": [
                 {"role": "system", "content": agent_config.system_prompt},
-                {"role": "system", "content": f"Current project: {project.name}\nDescription: {project.description}"},
+                {"role": "system", "content": project_info},
                 {"role": "user", "content": message}
             ],
             "temperature": agent_config.temperature
@@ -546,10 +552,13 @@ import re
 def format_ai_response(response, requested_features, project):
     # Format the response
     formatted_response = f"Project Name: {project.name}\n\n"
-    formatted_response += f"Description: {project.description}\n\n"
+    formatted_response += f"Description: {project.description or 'No description available.'}\n\n"
     formatted_response += "Main Features:\n"
-    for feature in project.main_features.split(', '):
-        formatted_response += f"• {feature}\n"
+    if project.main_features:
+        for feature in project.main_features.split(', '):
+            formatted_response += f"• {feature}\n"
+    else:
+        formatted_response += "No main features specified yet.\n"
 
     # Add the AI's response
     formatted_response += f"\nAI Response:\n{response}\n"
