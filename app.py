@@ -643,24 +643,20 @@ def get_ai_response(prompt):
 def update_project_journal(project_id):
     project = Project.query.get(project_id)
     
+    if not project:
+        return
+    
     # Create journal content
-    journal_content = "Project Name: Temalov\n\n"
-    journal_content += "Description: Temalov is a system designed to assist in creating, managing, and storing RPG elements using AI-powered tools and a web interface.\n\n"
+    journal_content = f"Project Name: {project.name}\n\n"
+    journal_content += f"Description: {project.description or 'No description available.'}\n\n"
     journal_content += "Features:\n"
     
-    features = [
-        "AI-powered character generation and details",
-        "Quest creation and management",
-        "Game settings storage and retrieval",
-        "User authentication and management",
-        "PDF content extraction and parsing",
-        "RESTful API for content management",
-        "Web-based user interface",
-        "Multiplayer functionality"
-    ]
-    
-    for feature in features:
-        journal_content += f"• {feature}\n"
+    if project.main_features:
+        features = project.main_features.split(', ')
+        for feature in features:
+            journal_content += f"• {feature}\n"
+    else:
+        journal_content += "No features specified yet.\n"
     
     # Update or create the project journal
     journal = ProjectJournal.query.filter_by(project_id=project_id).first()
