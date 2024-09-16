@@ -463,11 +463,22 @@ def chat():
 
         # Send request to the AI provider
         headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {api_key}"
+            "Content-Type": "application/json"
         }
+        if provider.name.lower() != 'ollama':
+            headers["Authorization"] = f"Bearer {api_key}"
+
         app.logger.info(f"Sending request to AI provider: {provider.api_url}")
-        response = requests.post(provider.api_url, json=chat_message, headers=headers, timeout=30)
+        
+        if provider.name.lower() == 'ollama':
+            ollama_payload = {
+                "model": agent_config.model_name,
+                "prompt": chat_message['messages'][-1]['content'],
+                "stream": False
+            }
+            response = requests.post(provider.api_url, json=ollama_payload, headers=headers, timeout=30)
+        else:
+            response = requests.post(provider.api_url, json=chat_message, headers=headers, timeout=30)
 
         app.logger.info(f"Response status code: {response.status_code}")
         response.raise_for_status()  # Raise an exception for non-200 status codes
@@ -478,11 +489,13 @@ def chat():
         response_json = response.json()
         app.logger.info(f"Response JSON: {response_json}")
 
-        if 'choices' not in response_json or not response_json['choices']:
-            app.logger.error("No choices in response JSON")
-            return jsonify({"error": "Invalid response from AI provider"}), 500
-
-        ai_response = response_json['choices'][0]['message']['content']
+        if provider.name.lower() == 'ollama':
+            ai_response = response_json.get('response', '')
+        else:
+            if 'choices' not in response_json or not response_json['choices']:
+                app.logger.error("No choices in response JSON")
+                return jsonify({"error": "Invalid response from AI provider"}), 500
+            ai_response = response_json['choices'][0]['message']['content']
         if not ai_response:
             app.logger.error("Empty AI response")
             return jsonify({"error": "Empty response from AI provider"}), 500
