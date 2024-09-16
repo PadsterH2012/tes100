@@ -241,6 +241,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     displayMessage({ agent_type: 'Project Assistant', content: `Error: ${data.error}` });
                 } else {
                     displayMessage({ agent_type: 'Project Assistant', content: data.response });
+                    // Update the journal content
+                    updateJournalContent(data.journal_content);
                 }
                 // Scroll to bottom after displaying the message
                 scrollChatToBottom();
@@ -252,6 +254,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 scrollChatToBottom();
             });
         }
+    }
+
+    function updateJournalContent(content) {
+        const journalTab = document.getElementById('tab1');
+        journalTab.innerHTML = `<h3>Project Journal</h3><pre>${content}</pre>`;
     }
 
     function scrollChatToBottom() {

@@ -82,29 +82,62 @@ def index():
     app.logger.debug("Index route hit")
     return render_template('index.html')
 
+import json
+
 @app.route('/api/projects', methods=['GET', 'POST'])
 def projects():
     if request.method == 'POST':
         data = request.json
-        new_project = Project(name=data['name'], description=data.get('description', ''))
+        new_project = Project(
+            name=data['name'],
+            description=data.get('description', ''),
+            main_features=', '.join(data.get('main_features', [])),
+            ai_agents=json.dumps(data.get('ai_agents', []))
+        )
         db.session.add(new_project)
         db.session.commit()
-        return jsonify({"id": new_project.id, "name": new_project.name, "description": new_project.description}), 201
+        return jsonify({
+            "id": new_project.id,
+            "name": new_project.name,
+            "description": new_project.description,
+            "main_features": new_project.main_features,
+            "ai_agents": json.loads(new_project.ai_agents)
+        }), 201
     else:
         projects = Project.query.all()
-        return jsonify([{"id": p.id, "name": p.name, "description": p.description or ''} for p in projects])
+        return jsonify([{
+            "id": p.id,
+            "name": p.name,
+            "description": p.description or '',
+            "main_features": p.main_features.split(', ') if p.main_features else [],
+            "ai_agents": json.loads(p.ai_agents) if p.ai_agents else []
+        } for p in projects])
 
 @app.route('/api/projects/<int:project_id>', methods=['GET', 'PUT', 'DELETE'])
 def project(project_id):
     project = Project.query.get_or_404(project_id)
     if request.method == 'GET':
-        return jsonify({"id": project.id, "name": project.name, "description": project.description})
+        return jsonify({
+            "id": project.id,
+            "name": project.name,
+            "description": project.description,
+            "main_features": project.main_features.split(', ') if project.main_features else [],
+            "ai_agents": json.loads(project.ai_agents) if project.ai_agents else []
+        })
     elif request.method == 'PUT':
         data = request.json
         project.name = data.get('name', project.name)
         project.description = data.get('description', project.description)
+        project.main_features = ', '.join(data.get('main_features', []))
+        project.ai_agents = json.dumps(data.get('ai_agents', []))
         db.session.commit()
-        return jsonify({"id": project.id, "name": project.name, "description": project.description})
+        return jsonify({
+            "id": project.id,
+            "name": project.name,
+            "description": project.description,
+            "main_features": project.main_features.split(', '),
+            "ai_agents": json.loads(project.ai_agents)
+        })
     elif request.method == 'DELETE':
         # Delete related conversations
         Conversation.query.filter_by(project_id=project_id).delete()
@@ -535,10 +568,10 @@ def chat():
 
         app.logger.info("Conversation saved to database")
 
-        # Update the project journal
-        update_project_journal(project_id)
+        # Update the project journal with the new conversation
+        journal_content = update_project_journal(project_id, f"User: {message}\nAI: {ai_response}")
 
-        return jsonify({"response": formatted_response})
+        return jsonify({"response": formatted_response, "journal_content": journal_content})
 
     except requests.RequestException as e:
         app.logger.error(f"Error communicating with AI provider: {str(e)}")
@@ -640,7 +673,7 @@ def get_ai_response(prompt):
     else:
         return response_json['choices'][0]['message']['content']
 
-def update_project_journal(project_id):
+def update_project_journal(project_id, new_content=None):
     project = Project.query.get(project_id)
     
     if not project:
@@ -658,6 +691,10 @@ def update_project_journal(project_id):
     else:
         journal_content += "No features specified yet.\n"
     
+    # Add new content if provided
+    if new_content:
+        journal_content += f"\n{new_content}\n"
+    
     # Update or create the project journal
     journal = ProjectJournal.query.filter_by(project_id=project_id).first()
     if journal:
@@ -668,6 +705,7 @@ def update_project_journal(project_id):
         db.session.add(journal)
     
     db.session.commit()
+    return journal_content
 
 @app.route('/api/projects/<int:project_id>/journal', methods=['GET'])
 def get_project_journal(project_id):
