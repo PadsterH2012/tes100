@@ -568,8 +568,8 @@ def chat():
 
         app.logger.info("Conversation saved to database")
 
-        # Update the project journal with the new conversation
-        journal_content = update_project_journal(project_id, f"User: {message}\nAI: {ai_response}")
+        # Update the project journal
+        journal_content = update_project_journal(project_id)
 
         return jsonify({"response": formatted_response, "journal_content": journal_content})
 
@@ -637,11 +637,7 @@ Format the response as a Python dictionary with keys 'name', 'description', and 
             ] + requested_features
         }
 
-def get_ai_response(prompt):
-    # Use the existing AI provider and configuration
-    agent_config = AIAgentConfig.query.filter_by(agent_type='Project Assistant').first()
-    provider = db.session.get(AIProvider, agent_config.provider_id)
-
+def get_ai_response(prompt, agent_config, provider):
     headers = {
         "Content-Type": "application/json"
     }
@@ -657,7 +653,7 @@ def get_ai_response(prompt):
         payload = {
             "model": agent_config.model_name,
             "messages": [
-                {"role": "system", "content": "You are a helpful AI assistant for generating project details."},
+                {"role": "system", "content": agent_config.system_prompt},
                 {"role": "user", "content": prompt}
             ],
             "temperature": agent_config.temperature
@@ -678,34 +674,52 @@ def update_project_journal(project_id, new_content=None):
     
     if not project:
         return
+
+    # Get the Project Writer agent configuration
+    agent_config = AIAgentConfig.query.filter_by(agent_type='Project Writer').first()
+    if not agent_config:
+        app.logger.error("Project Writer agent configuration not found")
+        return
+
+    # Get the AI provider
+    provider = db.session.get(AIProvider, agent_config.provider_id)
+    if not provider:
+        app.logger.error("AI provider not found for Project Writer")
+        return
+
+    # Prepare the conversation history
+    conversations = Conversation.query.filter_by(project_id=project_id).order_by(Conversation.timestamp).all()
+    conversation_history = "\n".join([f"{conv.agent_type}: {conv.content}" for conv in conversations])
+
+    # Prepare the prompt for the Project Writer
+    prompt = f"""Analyze the following conversation and extract important information about the project:
     
-    # Create journal content
-    journal_content = f"Project Name: {project.name}\n\n"
-    journal_content += f"Description: {project.description or 'No description available.'}\n\n"
-    journal_content += "Features:\n"
-    
-    if project.main_features:
-        features = project.main_features.split(', ')
-        for feature in features:
-            journal_content += f"• {feature}\n"
-    else:
-        journal_content += "No features specified yet.\n"
-    
-    # Add new content if provided
-    if new_content:
-        journal_content += f"\n{new_content}\n"
-    
+{conversation_history}
+
+Please provide a concise summary of the project, including:
+1. Project name
+2. Description
+3. Main features
+4. Tech stack
+5. Target audience
+6. Any other important details
+
+Format the response as a structured summary."""
+
+    # Get the AI response
+    ai_response = get_ai_response(prompt, agent_config, provider)
+
     # Update or create the project journal
     journal = ProjectJournal.query.filter_by(project_id=project_id).first()
     if journal:
-        journal.content = journal_content
+        journal.content = ai_response
         journal.last_updated = datetime.utcnow()
     else:
-        journal = ProjectJournal(project_id=project_id, content=journal_content)
+        journal = ProjectJournal(project_id=project_id, content=ai_response)
         db.session.add(journal)
     
     db.session.commit()
-    return journal_content
+    return ai_response
 
 @app.route('/api/projects/<int:project_id>/journal', methods=['GET'])
 def get_project_journal(project_id):
