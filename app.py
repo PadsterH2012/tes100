@@ -606,25 +606,36 @@ def get_ai_response(prompt):
     agent_config = AIAgentConfig.query.filter_by(agent_type='Project Assistant').first()
     provider = db.session.get(AIProvider, agent_config.provider_id)
 
-    chat_message = {
-        "model": agent_config.model_name,
-        "messages": [
-            {"role": "system", "content": "You are a helpful AI assistant for generating project details."},
-            {"role": "user", "content": prompt}
-        ],
-        "temperature": agent_config.temperature
-    }
-
     headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {provider.api_key}"
+        "Content-Type": "application/json"
     }
+    
+    if provider.name.lower() == 'ollama':
+        payload = {
+            "model": agent_config.model_name,
+            "prompt": prompt,
+            "stream": False
+        }
+    else:
+        headers["Authorization"] = f"Bearer {provider.api_key}"
+        payload = {
+            "model": agent_config.model_name,
+            "messages": [
+                {"role": "system", "content": "You are a helpful AI assistant for generating project details."},
+                {"role": "user", "content": prompt}
+            ],
+            "temperature": agent_config.temperature
+        }
 
-    response = requests.post(provider.api_url, json=chat_message, headers=headers, timeout=30)
+    response = requests.post(provider.api_url, json=payload, headers=headers, timeout=30)
     response.raise_for_status()
 
     response_json = response.json()
-    return response_json['choices'][0]['message']['content']
+    
+    if provider.name.lower() == 'ollama':
+        return response_json.get('response', '')
+    else:
+        return response_json['choices'][0]['message']['content']
 
 def update_project_journal(project_id):
     project = Project.query.get(project_id)
