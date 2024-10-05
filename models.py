@@ -17,6 +17,7 @@ class Project(db.Model):
     challenges = db.Column(db.Text)
     creation_date = db.Column(db.DateTime, default=datetime.utcnow)
     last_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    ai_agents = db.Column(db.Text)  # Store as JSON string
 
 class ProjectDocument(db.Model):
     id = db.Column(db.Integer, primary_key=True)
