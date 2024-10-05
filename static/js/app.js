@@ -31,19 +31,49 @@ document.addEventListener('DOMContentLoaded', () => {
     function createProjectBox(project) {
         const box = document.createElement('div');
         box.className = 'project-box';
-        box.innerHTML = `
-            <h3>${project.name}</h3>
-            <p>${project.description || 'No description available.'}</p>
-            <div class="button-group">
-                <button class="edit-project">Edit</button>
-                <button class="delete-project">Delete</button>
-                <button class="continue-project">Continue</button>
-            </div>
-        `;
 
-        box.querySelector('.edit-project').addEventListener('click', () => editProject(project.id));
-        box.querySelector('.delete-project').addEventListener('click', () => deleteProject(project.id));
-        box.querySelector('.continue-project').addEventListener('click', () => continueProject(project.id));
+        // Fetch project journal to get the current name and description
+        fetch(`/api/projects/${project.id}/journal`)
+            .then(response => response.json())
+            .then(data => {
+                const journalContent = data.content;
+                const nameMatch = journalContent.match(/Project Name:\s*(.+)/);
+                const descriptionMatch = journalContent.match(/Project Description:\s*(.+)/);
+
+                const currentName = nameMatch ? nameMatch[1] : project.name;
+                const currentDescription = descriptionMatch ? descriptionMatch[1] : (project.description || 'No description available.');
+
+                box.innerHTML = `
+                    <h3>${currentName}</h3>
+                    <p>${currentDescription}</p>
+                    <div class="button-group">
+                        <button class="edit-project">Edit</button>
+                        <button class="delete-project">Delete</button>
+                        <button class="continue-project">Continue</button>
+                    </div>
+                `;
+
+                box.querySelector('.edit-project').addEventListener('click', () => editProject(project.id));
+                box.querySelector('.delete-project').addEventListener('click', () => deleteProject(project.id));
+                box.querySelector('.continue-project').addEventListener('click', () => continueProject(project.id));
+            })
+            .catch(error => {
+                console.error('Error fetching project journal:', error);
+                // Fallback to original project data if journal fetch fails
+                box.innerHTML = `
+                    <h3>${project.name}</h3>
+                    <p>${project.description || 'No description available.'}</p>
+                    <div class="button-group">
+                        <button class="edit-project">Edit</button>
+                        <button class="delete-project">Delete</button>
+                        <button class="continue-project">Continue</button>
+                    </div>
+                `;
+
+                box.querySelector('.edit-project').addEventListener('click', () => editProject(project.id));
+                box.querySelector('.delete-project').addEventListener('click', () => deleteProject(project.id));
+                box.querySelector('.continue-project').addEventListener('click', () => continueProject(project.id));
+            });
 
         return box;
     }
