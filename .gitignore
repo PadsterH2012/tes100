@@ -1,3 +1,4 @@
 .aider*
 venv
 __pycache__
+instance/app.db
