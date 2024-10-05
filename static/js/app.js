@@ -47,6 +47,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 box.innerHTML = `
                     <h3>${currentName}</h3>
                     <p style="font-size: 0.9em;">${currentDescription}</p>
+                    <div class="rating-container">
+                        <span>Rating: </span>
+                        <select class="project-rating">
+                            <option value="">Select</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </div>
                     <div class="button-group">
                         <button class="edit-project">Edit</button>
                         <button class="delete-project">Delete</button>
@@ -57,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 box.querySelector('.edit-project').addEventListener('click', () => editProject(project.id));
                 box.querySelector('.delete-project').addEventListener('click', () => deleteProject(project.id));
                 box.querySelector('.continue-project').addEventListener('click', () => continueProject(project.id));
+                box.querySelector('.project-rating').addEventListener('change', (e) => rateProject(project.id, e.target.value));
             })
             .catch(error => {
                 console.error('Error fetching project journal:', error);
@@ -123,6 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(response => response.json())
             .then(project => {
                 document.getElementById('project-name').textContent = `Chat with AI - ${project.name}`;
+                document.title = `Chat with AI - ${project.name}`;
                 document.getElementById('project-documents-title').textContent = `Project - ${project.name}`;
             });
     }
@@ -887,5 +900,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Call loadAgentTypes when the page loads
     loadAgentTypes();
+
+    function rateProject(projectId, rating) {
+        fetch(`/api/projects/${projectId}/rate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ rating: parseInt(rating) }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(`Project rated ${rating} stars successfully!`);
+        })
+        .catch(error => {
+            console.error('Error rating project:', error);
+            alert('Failed to rate project. Please try again.');
+        });
+    }
 
 });
