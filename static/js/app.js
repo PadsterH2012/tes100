@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     .then(response => response.json())
                     .then(data => {
                         const journalTab = document.getElementById('tab1');
-                        journalTab.innerHTML = `<h3>${projectName} - Project Journal</h3><pre>${data.content}</pre>`;
+                        journalTab.innerHTML = `<h3>Project Journal</h3><pre>${data.content}</pre>`;
                     });
 
                 // Load and display the project scope
