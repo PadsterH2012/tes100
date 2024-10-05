@@ -7,6 +7,18 @@ import os
 import requests
 from sqlalchemy import desc
 
+# Update the Project model
+class Project(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+    main_features = db.Column(db.Text)
+    ai_agents = db.Column(db.Text)
+    rating_sum = db.Column(db.Integer, default=0)
+    rating_count = db.Column(db.Integer, default=0)
+    average_rating = db.Column(db.Float, default=0.0)
+    likes = db.Column(db.JSON, default=[])
+
 app = Flask(__name__)
 app.config.from_object(Config)
 db.init_app(app)
@@ -92,7 +104,8 @@ def projects():
             name=data['name'],
             description=data.get('description', ''),
             main_features=', '.join(data.get('main_features', [])),
-            ai_agents=json.dumps(data.get('ai_agents', []))
+            ai_agents=json.dumps(data.get('ai_agents', [])),
+            likes=[]
         )
         db.session.add(new_project)
         db.session.commit()
@@ -101,7 +114,9 @@ def projects():
             "name": new_project.name,
             "description": new_project.description,
             "main_features": new_project.main_features,
-            "ai_agents": json.loads(new_project.ai_agents)
+            "ai_agents": json.loads(new_project.ai_agents),
+            "average_rating": new_project.average_rating,
+            "likes_count": len(new_project.likes)
         }), 201
     else:
         projects = Project.query.all()
@@ -110,7 +125,9 @@ def projects():
             "name": p.name,
             "description": p.description or '',
             "main_features": p.main_features.split(', ') if p.main_features else [],
-            "ai_agents": json.loads(p.ai_agents) if p.ai_agents else []
+            "ai_agents": json.loads(p.ai_agents) if p.ai_agents else [],
+            "average_rating": p.average_rating,
+            "likes_count": len(p.likes)
         } for p in projects])
 
 @app.route('/api/projects/<int:project_id>', methods=['GET', 'PUT', 'DELETE'])
@@ -122,7 +139,9 @@ def project(project_id):
             "name": project.name,
             "description": project.description,
             "main_features": project.main_features.split(', ') if project.main_features else [],
-            "ai_agents": json.loads(project.ai_agents) if project.ai_agents else []
+            "ai_agents": json.loads(project.ai_agents) if project.ai_agents else [],
+            "average_rating": project.average_rating,
+            "likes_count": len(project.likes)
         })
     elif request.method == 'PUT':
         data = request.json
@@ -136,7 +155,9 @@ def project(project_id):
             "name": project.name,
             "description": project.description,
             "main_features": project.main_features.split(', '),
-            "ai_agents": json.loads(project.ai_agents)
+            "ai_agents": json.loads(project.ai_agents),
+            "average_rating": project.average_rating,
+            "likes_count": len(project.likes)
         })
     elif request.method == 'DELETE':
         # Delete related conversations
@@ -826,6 +847,44 @@ def project_unit_tests(project_id):
     else:
         unit_tests = UnitTest.query.filter_by(project_id=project_id).all()
         return jsonify([{"component_name": test.component_name, "content": test.content} for test in unit_tests])
+
+@app.route('/api/projects/<int:project_id>/rate', methods=['POST'])
+def rate_project(project_id):
+    project = Project.query.get_or_404(project_id)
+    rating = request.json.get('rating')
+    if rating is None or not isinstance(rating, int) or rating < 1 or rating > 5:
+        return jsonify({"error": "Invalid rating. Must be an integer between 1 and 5."}), 400
+    
+    project.rating_sum = (project.rating_sum or 0) + rating
+    project.rating_count = (project.rating_count or 0) + 1
+    project.average_rating = project.rating_sum / project.rating_count
+    db.session.commit()
+    
+    return jsonify({
+        "message": "Project rated successfully",
+        "new_average_rating": project.average_rating
+    })
+
+@app.route('/api/projects/<int:project_id>/like', methods=['POST'])
+def like_project(project_id):
+    project = Project.query.get_or_404(project_id)
+    user_id = request.json.get('user_id')  # In a real app, you'd get this from the authenticated user
+    if not user_id:
+        return jsonify({"error": "User ID is required"}), 400
+    
+    if user_id in project.likes:
+        project.likes.remove(user_id)
+        message = "Project unliked successfully"
+    else:
+        project.likes.append(user_id)
+        message = "Project liked successfully"
+    
+    db.session.commit()
+    
+    return jsonify({
+        "message": message,
+        "likes_count": len(project.likes)
+    })
 
 if __name__ == '__main__':
     init_db()
