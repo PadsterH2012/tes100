@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function createProjectBox(project) {
         const box = document.createElement('div');
         box.className = 'project-box';
+        box.style.width = '175%'; // Increase width by 75%
 
         // Fetch project journal to get the current name and description
         fetch(`/api/projects/${project.id}/journal`)
@@ -45,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 box.innerHTML = `
                     <h3>${currentName}</h3>
-                    <p>${currentDescription}</p>
+                    <p style="font-size: 0.9em;">${currentDescription}</p>
                     <div class="button-group">
                         <button class="edit-project">Edit</button>
                         <button class="delete-project">Delete</button>
@@ -62,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Fallback to original project data if journal fetch fails
                 box.innerHTML = `
                     <h3>${project.name}</h3>
-                    <p>${project.description || 'No description available.'}</p>
+                    <p style="font-size: 0.9em;">${project.description || 'No description available.'}</p>
                     <div class="button-group">
                         <button class="edit-project">Edit</button>
                         <button class="delete-project">Delete</button>
