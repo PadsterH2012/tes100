@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(data => {
                 const journalContent = data.content;
                 const nameMatch = journalContent.match(/Project Name:\s*(.+)/);
-                const descriptionMatch = journalContent.match(/Project Description:\s*([\s\S]+?)(?=\n\n|\n*$)/);
+                const descriptionMatch = journalContent.match(/Description:\s*([\s\S]+?)(?=\n\n|\n*$)/);
 
                 const currentName = nameMatch ? nameMatch[1] : project.name;
                 const currentDescription = descriptionMatch ? descriptionMatch[1].trim() : (project.description || 'No description available.');
