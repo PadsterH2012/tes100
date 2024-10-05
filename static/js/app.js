@@ -311,9 +311,39 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    let currentProjectName = '';
+    let currentProjectDescription = '';
+
     function updateJournalContent(content) {
         const journalTab = document.getElementById('tab1');
         journalTab.innerHTML = `<h3>Project Journal</h3><pre>${content}</pre>`;
+
+        // Extract current project name and description
+        const nameMatch = content.match(/Project Name:\s*(.+)/);
+        const descriptionMatch = content.match(/Description:\s*([\s\S]+?)(?=\n\n|\n*$)/);
+
+        currentProjectName = nameMatch ? nameMatch[1].trim() : '';
+        currentProjectDescription = descriptionMatch ? descriptionMatch[1].trim() : '';
+
+        // Update the project name in the header
+        document.getElementById('project-name').textContent = currentProjectName;
+
+        // Update the project name and description in the chat interface
+        updateChatInterfaceProjectInfo();
+    }
+
+    function updateChatInterfaceProjectInfo() {
+        const projectInfoElement = document.getElementById('project-info');
+        if (!projectInfoElement) {
+            const chatInterface = document.getElementById('chat-interface');
+            const newProjectInfoElement = document.createElement('div');
+            newProjectInfoElement.id = 'project-info';
+            chatInterface.insertBefore(newProjectInfoElement, chatInterface.firstChild);
+        }
+        document.getElementById('project-info').innerHTML = `
+            <h3>${currentProjectName}</h3>
+            <p>${currentProjectDescription}</p>
+        `;
     }
 
     function scrollChatToBottom() {
@@ -403,14 +433,17 @@ document.addEventListener('DOMContentLoaded', () => {
         clearChatMessages();
         loadProjectDocuments(projectId);
         loadChatHistory(projectId);
-        debugChatHistory(projectId); // Add this line to debug
+        debugChatHistory(projectId);
 
-        // Fetch and set the project name
+        // Fetch project data and update the interface
         fetch(`/api/projects/${projectId}`)
             .then(response => response.json())
             .then(project => {
-                document.getElementById('project-name').textContent = project.name;
-                document.getElementById('project-documents-title').textContent = `Project - ${project.name}`;
+                currentProjectName = project.name;
+                currentProjectDescription = project.description || 'No description available.';
+                document.getElementById('project-name').textContent = currentProjectName;
+                document.getElementById('project-documents-title').textContent = `Project - ${currentProjectName}`;
+                updateChatInterfaceProjectInfo();
             });
     }
 
