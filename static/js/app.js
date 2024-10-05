@@ -134,9 +134,9 @@ document.addEventListener('DOMContentLoaded', () => {
         fetch(`/api/projects/${projectId}`)
             .then(response => response.json())
             .then(project => {
-                document.getElementById('project-name').textContent = `Chat with AI - ${project.name}`;
+                document.getElementById('project-name').textContent = `${project.name}`;
                 document.title = `Chat with AI - ${project.name}`;
-                document.getElementById('project-documents-title').textContent = `Project - ${project.name}`;
+                document.getElementById('project-documents-title').textContent = `AProject - ${project.name}`;
             });
     }
 
