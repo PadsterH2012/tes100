@@ -330,6 +330,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Update the project name and description in the chat interface
         updateChatInterfaceProjectInfo();
+
+        // Update the project name in the database
+        if (currentProjectId && currentProjectName) {
+            fetch(`/api/projects/${currentProjectId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name: currentProjectName }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Project name updated in database:', data);
+            })
+            .catch(error => {
+                console.error('Error updating project name in database:', error);
+            });
+        }
     }
 
     function updateChatInterfaceProjectInfo() {
